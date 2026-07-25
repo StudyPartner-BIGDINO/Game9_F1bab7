@@ -1,68 +1,2297 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Level 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>第3关 – 贪吃蛇 | 伊甸园历险记</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        body {
-            background: radial-gradient(circle, #1a2230 0%, #080b11 100%);
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020503;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
             color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+        }
+
+        /* 9:16 Portrait Game Frame */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 520px;
+            max-height: 925px;
+            background: #040d07;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 20px rgba(34, 197, 94, 0.15);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 40px 60px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            max-width: 90%;
-            width: 400px;
+
+        @media (min-width: 530px) {
+            #game-container {
+                border-radius: 20px;
+                border: 2px solid rgba(212, 175, 55, 0.5);
+                height: 96vh;
+            }
         }
-        h1 {
-            font-size: 2.5rem;
-            color: #ffd700;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+
+        /* Static Gameplay Foliage Background Layer */
+        #gameplay-foliage-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
         }
-        p {
-            color: #8a9fc4;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
+
+        /* Canvas Arena */
+        #gameCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+            z-index: 5;
         }
-        .back-btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #ffd700 0%, #cca100 100%);
-            color: #0b0d10;
-            text-decoration: none;
-            padding: 12px 30px;
+
+        /* HUD Top Bar */
+        #hud-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+            background: linear-gradient(180deg, rgba(3, 10, 6, 0.92) 0%, rgba(3, 10, 6, 0) 100%);
+            pointer-events: none;
+        }
+
+        .hud-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .hud-badge {
+            background: rgba(10, 26, 16, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.88rem;
             font-weight: bold;
-            border-radius: 25px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            color: #fef08a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(6px);
         }
-        .back-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+
+        .hud-stars {
+            color: #ffd700;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+        }
+
+        .hud-btn {
+            background: radial-gradient(circle, #3d2716 0%, #1c1108 100%);
+            border: 1.5px solid #d4af37;
+            color: #ffd700;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            transition: transform 0.15s ease;
+        }
+
+        .hud-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Active Question Compact Header Bar with Expand Arrow */
+        #active-question-bar {
+            position: absolute;
+            top: 58px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            background: rgba(12, 24, 16, 0.94);
+            border: 1px solid rgba(212, 175, 55, 0.65);
+            border-radius: 12px;
+            padding: 8px 12px;
+            z-index: 18;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            display: none;
+            text-align: center;
+            animation: fadeInDown 0.4s ease;
+            transition: max-height 0.3s ease;
+        }
+
+        #active-question-wrapper {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        #active-question-text {
+            color: #fef08a;
+            font-size: 0.85rem;
+            line-height: 1.35;
+            font-weight: 700;
+            text-align: left;
+            flex: 1;
+            /* Default clamped 2 lines */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+        /* Expanded State for Long Questions */
+        #active-question-bar.expanded #active-question-text {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+
+        #btn-toggle-expand {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #ffd700;
+            font-size: 0.75rem;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: none; /* Auto-shown only when overflow detected */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        #btn-toggle-expand:hover {
+            background: rgba(212, 175, 55, 0.35);
+        }
+
+        #active-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            font-size: 0.72rem;
+            color: #d1fae5;
+            text-align: left;
+            margin-top: 4px;
+        }
+
+        .active-opt-item {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 3px 6px;
+            border-radius: 4px;
+            border-left: 2px solid #d4af37;
+        }
+
+        /* Modal Overlays (Parchment Quest Card) */
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 8, 4, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .parchment-card {
+            background: linear-gradient(135deg, #f5eccf 0%, #e3d3a3 100%);
+            border: 8px solid #2d1e12;
+            outline: 2px solid #d4af37;
+            border-radius: 18px;
+            padding: 22px 18px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.85), inset 0 0 40px rgba(139, 90, 43, 0.25);
+            color: #2a1a08;
+            position: relative;
+            transform: scale(0.92);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .parchment-card {
+            transform: scale(1);
+        }
+
+        .parchment-header {
+            text-align: center;
+            border-bottom: 2px dashed #8b5a2b;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .parchment-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #4a2e12;
+            letter-spacing: 1px;
+        }
+
+        .parchment-subtitle {
+            font-size: 0.78rem;
+            color: #7a5228;
+            margin-top: 2px;
+        }
+
+        .question-body {
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: #1a0f05;
+            font-weight: 700;
+            margin-bottom: 14px;
+            background: rgba(255, 255, 255, 0.45);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5a2b;
+            white-space: pre-line;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .option-card-item {
+            background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(240,225,190,0.6) 100%);
+            border: 1px solid #b89868;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            color: #2b1805;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opt-badge {
+            background: #4a2e12;
+            color: #ffd700;
+            font-weight: 900;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .btn-fantasy {
+            display: block;
+            width: 100%;
+            padding: 13px 0;
+            background: linear-gradient(180deg, #ffd700 0%, #caa000 100%);
+            border: 2px solid #fff2a3;
+            border-radius: 30px;
+            color: #2b1a00;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4), inset 0 2px 0 rgba(255,255,255,0.6);
+            transition: transform 0.15s ease;
+        }
+
+        .btn-fantasy:active {
+            transform: scale(0.97);
+        }
+
+        /* Countdown Display */
+        #countdown-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 45;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        #countdown-layer.active {
+            opacity: 1;
+        }
+
+        #countdown-num {
+            font-size: 6rem;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 30px #ff9900, 0 0 60px #ff6600, 0 5px 15px rgba(0,0,0,0.8);
+            transform: scale(0.3);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        #countdown-num.animate {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        /* Toast Feedback Banner */
+        #toast-banner {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 35;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            pointer-events: none;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        #toast-banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-correct { background: linear-gradient(135deg, #10b981, #047857); border: 2px solid #6ee7b7; color: #fff; }
+        .toast-wrong { background: linear-gradient(135deg, #ef4444, #b91c1c); border: 2px solid #fca5a5; color: #fff; }
+        .toast-speed { background: linear-gradient(135deg, #f59e0b, #d97706); border: 2px solid #fde68a; color: #fff; }
+        .toast-dizzy { background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 2px solid #ddd6fe; color: #fff; }
+
+        /* Powerup Bar */
+        #powerup-timer-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            overflow: hidden;
+            z-index: 25;
+            display: none;
+        }
+
+        #powerup-progress {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        /* Pause & Victory Modals */
+        .menu-box {
+            background: linear-gradient(180deg, #122116 0%, #0a140d 100%);
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 28px 22px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+        }
+
+        .modal-title-gold {
+            font-size: 1.8rem;
+            color: #ffd700;
+            font-weight: 900;
+            margin-bottom: 18px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-modal {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #24382a 0%, #122117 100%);
+            border: 1.5px solid #d4af37;
+            border-radius: 25px;
+            color: #fef08a;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-modal:active {
+            transform: scale(0.96);
+            background: #d4af37;
+            color: #0a140d;
+        }
+
+        .btn-primary-gold {
+            background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
+            color: #0c1a11;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.35);
+        }
+
+        .victory-stats {
+            background: rgba(0,0,0,0.45);
+            border-radius: 12px;
+            padding: 14px;
+            margin: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #d1d5db;
+        }
+
+        .stat-val {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* ==========================================================================
+           SEMI-REALISTIC DENSE TROPICAL JUNGLE WALL OVERLAY
+           ========================================================================== */
+        #opening-viewport {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            overflow: hidden;
+            background: #020704;
+            pointer-events: auto;
+        }
+
+        /* Sunlight Burst behind foliage */
+        #opening-light-burst {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.2);
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(255, 235, 140, 0.85) 0%, rgba(217, 119, 6, 0.3) 45%, rgba(0,0,0,0) 75%);
+            border-radius: 50%;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 1.2s ease, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        /* Hanging Branch + Eden Apple (z-101, fully occluded by foliage at 0.0s) */
+        #opening-branch-apple {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            height: 280px;
+            z-index: 101;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        #opening-branch-apple.show {
+            opacity: 1;
+        }
+
+        /* SVG Foliage Layers */
+        .foliage-svg-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .foliage-layer-group {
+            transform-box: fill-box;
+            transform-origin: center center;
+            transition: transform 1.8s cubic-bezier(0.2, 1, 0.3, 1), opacity 1.5s ease;
+        }
+
+        #foliage-layer-mat { z-index: 102; }
+        #foliage-layer-back { z-index: 103; }
+        #foliage-layer-mid { z-index: 104; }
+        #foliage-layer-front { 
+            z-index: 105; 
+            filter: drop-shadow(0 14px 28px rgba(0,0,0,0.9)); 
+        }
+
+        /* Title Overlay */
+        #opening-title-container {
+            position: absolute;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateY(15px);
+            z-index: 108;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        #opening-title-container.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) translateY(0);
+        }
+
+        .title-level-badge {
+            font-size: 1.25rem;
+            color: #a3e635;
+            letter-spacing: 6px;
+            text-shadow: 0 0 12px rgba(163, 230, 53, 0.6);
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .title-main-text {
+            font-size: 3.4rem;
+            font-weight: 900;
+            background: linear-gradient(180deg, #fffbeb 0%, #fde047 35%, #ca8a04 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+            letter-spacing: 8px;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translate(-50%, -15px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>LEVEL 1</h1>
-        <p>Welcome to the first battle arena!</p>
-        <a href="index.html" class="back-btn">Back to Map</a>
+
+    <div id="game-container">
+        <!-- Static Gameplay Botanical Foliage Layer (Behind Canvas, Matches Opening Style) -->
+        <svg id="gameplay-foliage-svg" viewBox="0 0 400 700" preserveAspectRatio="none">
+            <defs id="gameplay-leaf-defs"></defs>
+            <g id="gameplay-foliage-group"></g>
+        </svg>
+
+        <!-- Canvas Arena -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD Top Bar -->
+        <div id="hud-container">
+            <div class="hud-group">
+                <div class="hud-badge">第3关</div>
+                <div class="hud-badge" id="hud-question-count">第 1 / 5 题</div>
+            </div>
+            <div class="hud-group">
+                <div class="hud-badge">
+                    <span class="hud-stars" id="hud-stars-display">★★★</span>
+                </div>
+                <div class="hud-badge">
+                    <span>分数:</span>
+                    <span id="hud-score-display" style="color:#ffd700;">0</span>
+                </div>
+                <div class="hud-btn" id="btn-pause" title="暂停">⏸</div>
+            </div>
+        </div>
+
+        <!-- Active Question Compact Header Bar with Dynamic Expand Arrow -->
+        <div id="active-question-bar">
+            <div id="active-question-wrapper">
+                <div id="active-question-text">Question text loading...</div>
+                <button id="btn-toggle-expand" aria-label="展开题目">▼</button>
+            </div>
+            <div id="active-options-grid">
+                <div class="active-opt-item" id="opt-preview-a">A. Option</div>
+                <div class="active-opt-item" id="opt-preview-b">B. Option</div>
+                <div class="active-opt-item" id="opt-preview-c">C. Option</div>
+                <div class="active-opt-item" id="opt-preview-d">D. Option</div>
+            </div>
+        </div>
+
+        <!-- Toast Feedback Banner -->
+        <div id="toast-banner">答对了！</div>
+
+        <!-- Speed Boost Powerup Progress Bar -->
+        <div id="powerup-timer-bar">
+            <div id="powerup-progress"></div>
+        </div>
+
+        <!-- Full Parchment Question Modal -->
+        <div class="modal-overlay" id="question-modal">
+            <div class="parchment-card">
+                <div class="parchment-header">
+                    <div class="parchment-title" id="modal-q-title">第 1 题</div>
+                    <div class="parchment-subtitle">请仔细阅读题目并控制贪吃蛇选择正确答案</div>
+                </div>
+                <div class="question-body" id="modal-q-text">
+                    Question text loading...
+                </div>
+                <div class="options-list" id="modal-options-list">
+                    <!-- Populated dynamically -->
+                </div>
+                <button class="btn-fantasy" id="btn-start-question">开 始</button>
+            </div>
+        </div>
+
+        <!-- Countdown Overlay -->
+        <div id="countdown-layer">
+            <div id="countdown-num">3</div>
+        </div>
+
+        <!-- Pause Modal -->
+        <div class="modal-overlay" id="pause-modal">
+            <div class="menu-box">
+                <div class="modal-title-gold">游戏暂停</div>
+                <button class="btn-modal btn-primary-gold" id="btn-resume">继续游戏</button>
+                <button class="btn-modal" id="btn-restart">重新开始</button>
+                <button class="btn-modal" id="btn-quit">返回地图</button>
+            </div>
+        </div>
+
+        <!-- Victory Modal -->
+        <div class="modal-overlay" id="victory-modal">
+            <div class="menu-box">
+                <div class="modal-title-gold" style="font-size:2rem; margin-bottom:8px;">任务完成</div>
+                <div style="color:#a3e635; font-size:1.1rem; font-weight:bold; margin-bottom:12px;">第3关完成！</div>
+                
+                <div class="victory-stats">
+                    <div class="stat-row">
+                        <span>最终分数</span>
+                        <span class="stat-val" id="victory-score">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>获得星星</span>
+                        <span class="stat-val" id="victory-stars" style="color:#ffd700; letter-spacing:2px;">★★★</span>
+                    </div>
+                </div>
+                <p style="color:#e2e8f0; font-size:0.88rem; margin-bottom:18px; line-height:1.4;">
+                    恭喜你成功通关伊甸园的贪吃蛇挑战！
+                </p>
+                <button class="btn-modal btn-primary-gold" id="btn-victory-map">关卡完成</button>
+            </div>
+        </div>
+
+        <!-- Cinematic Opening Viewport -->
+        <div id="opening-viewport">
+            <!-- Light Shaft Burst (Background z-100) -->
+            <div id="opening-light-burst"></div>
+
+            <!-- Hanging Branch + Semi-Realistic Eden Apple (z-101, occluded at 0.0s) -->
+            <div id="opening-branch-apple">
+                <svg width="220" height="280" viewBox="0 0 220 280">
+                    <defs>
+                        <radialGradient id="appleBodyGrad" cx="35%" cy="30%" r="70%">
+                            <stop offset="0%" stop-color="#ff8888" />
+                            <stop offset="25%" stop-color="#dc2626" />
+                            <stop offset="70%" stop-color="#991b1b" />
+                            <stop offset="100%" stop-color="#450a0a" />
+                        </radialGradient>
+                        <radialGradient id="appleHighlight" cx="30%" cy="25%" r="35%">
+                            <stop offset="0%" stop-color="rgba(255,255,255,0.7)" />
+                            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                        </radialGradient>
+                        <linearGradient id="branchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3b200d" />
+                            <stop offset="50%" stop-color="#78350f" />
+                            <stop offset="100%" stop-color="#1c0d04" />
+                        </linearGradient>
+                        <linearGradient id="appleLeafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#86efac" />
+                            <stop offset="50%" stop-color="#16a34a" />
+                            <stop offset="100%" stop-color="#064e3b" />
+                        </linearGradient>
+                    </defs>
+
+                    <path d="M 10 -10 Q 70 40 110 90 Q 140 120 220 130" stroke="url(#branchGrad)" stroke-width="9" fill="none" stroke-linecap="round"/>
+                    <path d="M 110 90 Q 90 130 75 160" stroke="url(#branchGrad)" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+                    <path d="M 115 80 Q 145 65 165 85 Q 135 100 115 80" fill="url(#appleLeafGrad)"/>
+                    <path d="M 85 130 Q 55 120 45 140 Q 75 150 85 130" fill="url(#appleLeafGrad)"/>
+
+                    <path d="M 110 135 Q 112 165 110 182" stroke="#451a03" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+                    <path d="M 110 162 C 125 145 150 150 145 168 C 130 178 115 170 110 162 Z" fill="url(#appleLeafGrad)"/>
+                    <path d="M 110 162 Q 130 162 145 168" stroke="#fef08a" stroke-width="0.8" fill="none" opacity="0.6"/>
+
+                    <g transform="translate(62, 178)">
+                        <path d="M 48 8 
+                                 C 38 0, 18 2, 8 16 
+                                 C -4 32, -2 60, 14 84 
+                                 C 26 102, 42 106, 48 106 
+                                 C 54 106, 70 102, 82 84 
+                                 C 98 60, 100 32, 88 16 
+                                 C 78 2, 58 0, 48 8 Z" 
+                              fill="url(#appleBodyGrad)"/>
+                        <path d="M 36 6 Q 48 14 60 6 Q 48 10 36 6 Z" fill="#290303" opacity="0.6"/>
+                        <path d="M 48 8 
+                                 C 38 0, 18 2, 8 16 
+                                 C -4 32, -2 60, 14 84 
+                                 C 26 102, 42 106, 48 106 
+                                 C 54 106, 70 102, 82 84 
+                                 C 98 60, 100 32, 88 16 
+                                 C 78 2, 58 0, 48 8 Z" 
+                              fill="url(#appleHighlight)"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- SVG Foliage Containers (Z-102, 103, 104, 105) -->
+            <svg class="foliage-svg-container" id="foliage-layer-mat" viewBox="0 0 400 700" preserveAspectRatio="none"></svg>
+            <svg class="foliage-svg-container" id="foliage-layer-back" viewBox="0 0 400 700" preserveAspectRatio="none">
+                <defs id="svg-leaf-defs"></defs>
+            </svg>
+            <svg class="foliage-svg-container" id="foliage-layer-mid" viewBox="0 0 400 700" preserveAspectRatio="none"></svg>
+            <svg class="foliage-svg-container" id="foliage-layer-front" viewBox="0 0 400 700" preserveAspectRatio="none"></svg>
+
+            <!-- Cinematic Title Overlay -->
+            <div id="opening-title-container">
+                <div class="title-level-badge">第 3 关</div>
+                <div class="title-main-text">贪吃蛇</div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        /* ==========================================================================
+           GAME QUESTIONS DATA (Bahasa Melayu - EXACT & UNTOUCHED)
+           ========================================================================== */
+        const QUESTIONS_DATA = [
+            {
+                id: 1,
+                question: "Perluasan fizikal dilakukan oleh sesebuah kerajaan dengan menguasai wilayah-wilayah lain.\n\nFaktor manakah paling penting membolehkan perluasan kuasa tersebut tercapai?",
+                options: [
+                    { letter: "A", text: "Diplomasi" },
+                    { letter: "B", text: "Jolak ansur" },
+                    { letter: "C", text: "Kekuatan tentera" },
+                    { letter: "D", text: "Sokongan penduduk" }
+                ],
+                correct: "C"
+            },
+            {
+                id: 2,
+                question: "Kepentingan Pendidikan dalam Tamadun China menyebabkan perkembangan yang pesat dalam Pendidikan negara.\n\nApakah matlamat sistem Pendidikan Tamadun China?\nI. Memilih pegawai kerajaan\nII. Memupuk nilai moral\nIII. Menyelaraskan Bahasa\nIV. Mengawal tingkah laku manusia",
+                options: [
+                    { letter: "A", text: "I dan II" },
+                    { letter: "B", text: "I dan IV" },
+                    { letter: "C", text: "II dan III" },
+                    { letter: "D", text: "III dan IV" }
+                ],
+                correct: "B"
+            },
+            {
+                id: 3,
+                question: "Kerajaan-kerajaan kecil yang muncul di sekitar Lembah Ganges dikenali sebagai",
+                options: [
+                    { letter: "A", text: "mahajanapada" },
+                    { letter: "B", text: "janapada" },
+                    { letter: "C", text: "empayar" },
+                    { letter: "D", text: "wilayah" }
+                ],
+                correct: "B"
+            },
+            {
+                id: 4,
+                question: "Apakah pusat pemerintahan Dinasti Qin?",
+                options: [
+                    { letter: "A", text: "Chang'an" },
+                    { letter: "B", text: "Xianyang" },
+                    { letter: "C", text: "Loyang" },
+                    { letter: "D", text: "Pataliputra" }
+                ],
+                correct: "B"
+            },
+            {
+                id: 5,
+                question: "Di manakah pusat pemerintahan Han Awal?",
+                options: [
+                    { letter: "A", text: "Xianyang" },
+                    { letter: "B", text: "Loyang" },
+                    { letter: "C", text: "Chang'an" },
+                    { letter: "D", text: "Beijing" }
+                ],
+                correct: "C"
+            }
+        ];
+
+        /* ==========================================================================
+           AUDIO SYSTEM (Synthesizer via Web Audio API)
+           ========================================================================== */
+        class SoundFX {
+            constructor() { this.ctx = null; }
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+            }
+            playCorrect() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                osc.frequency.setValueAtTime(1046.50, now + 0.24);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(now + 0.45);
+            }
+            playWrong() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(130, now + 0.15);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(now + 0.35);
+            }
+            playSpeed() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(now + 0.25);
+            }
+            playDizzy() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                for(let i = 0; i < 4; i++) {
+                    osc.frequency.setValueAtTime(320, now + i*0.08);
+                    osc.frequency.setValueAtTime(220, now + i*0.08 + 0.04);
+                }
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(now + 0.35);
+            }
+            playBounce() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(110, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(now + 0.1);
+            }
+        }
+        const soundFX = new SoundFX();
+
+        /* ==========================================================================
+           BOTANICAL FOLIAGE SYSTEM (OPENING SCENE)
+           ========================================================================== */
+        const clusterNodesData = [];
+
+        function injectBotanicalDefs() {
+            const defs = document.getElementById('svg-leaf-defs');
+            defs.innerHTML = `
+                <!-- Rich Multi-Stop Natural Gradients -->
+                <linearGradient id="gradForestDeep" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#04180d" />
+                    <stop offset="40%" stop-color="#0f4522" />
+                    <stop offset="85%" stop-color="#1b6335" />
+                </linearGradient>
+
+                <linearGradient id="gradEmerald" x1="20%" y1="0%" x2="80%" y2="100%">
+                    <stop offset="0%" stop-color="#0a2e16" />
+                    <stop offset="45%" stop-color="#15803d" />
+                    <stop offset="85%" stop-color="#229e4d" />
+                    <stop offset="100%" stop-color="#3eb86a" />
+                </linearGradient>
+
+                <linearGradient id="gradMoss" x1="0%" y1="10%" x2="100%" y2="90%">
+                    <stop offset="0%" stop-color="#122404" />
+                    <stop offset="50%" stop-color="#365314" />
+                    <stop offset="85%" stop-color="#4d7c0f" />
+                </linearGradient>
+
+                <linearGradient id="gradJade" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#032212" />
+                    <stop offset="50%" stop-color="#115e34" />
+                    <stop offset="100%" stop-color="#1eb063" />
+                </linearGradient>
+
+                <!-- Natural Overlap Shadow -->
+                <filter id="softOverlapShadow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#010a04" flood-opacity="0.85"/>
+                </filter>
+            `;
+        }
+
+        function buildDenseWallOfFoliage() {
+            injectBotanicalDefs();
+
+            const layers = {
+                mat: document.getElementById('foliage-layer-mat'),
+                back: document.getElementById('foliage-layer-back'),
+                mid: document.getElementById('foliage-layer-mid'),
+                front: document.getElementById('foliage-layer-front')
+            };
+
+            Object.values(layers).forEach(el => { if(el) el.innerHTML = ''; });
+            clusterNodesData.length = 0;
+
+            const gradients = ['url(#gradForestDeep)', 'url(#gradEmerald)', 'url(#gradMoss)', 'url(#gradJade)'];
+
+            // 1. FULL BOTANICAL BACKING MAT
+            const matGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            for (let r = -1; r <= 7; r++) {
+                for (let c = -1; c <= 5; c++) {
+                    const bx = c * 85 - 15;
+                    const by = r * 105 - 15;
+
+                    const darkPatch = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    darkPatch.setAttribute("d", `M ${bx} ${by} 
+                                                 Q ${bx + 90} ${by - 30} ${bx + 140} ${by + 40} 
+                                                 Q ${bx + 120} ${by + 120} ${bx + 30} ${by + 130} 
+                                                 Q ${bx - 20} ${by + 70} ${bx} ${by} Z`);
+                    darkPatch.setAttribute("fill", "#041a0d");
+                    darkPatch.setAttribute("opacity", "0.98");
+                    matGroup.appendChild(darkPatch);
+
+                    const fern = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    fern.setAttribute("d", `M ${bx + 20} ${by + 10} Q ${bx + 70} ${by + 60} ${bx + 110} ${by + 100}`);
+                    fern.setAttribute("stroke", "#092e18");
+                    fern.setAttribute("stroke-width", "12");
+                    fern.setAttribute("stroke-linecap", "round");
+                    matGroup.appendChild(fern);
+                }
+            }
+            layers.mat.appendChild(matGroup);
+
+            // 2. HELPER: PLANT CLUSTERS
+            function createBotanicalPlantCluster(w, h) {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("filter", "url(#softOverlapShadow)");
+
+                const mainGrad = gradients[Math.floor(Math.random() * gradients.length)];
+
+                const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                stem.setAttribute("d", `M 0 0 Q ${w * 0.45} ${h * 0.2} ${w} ${h}`);
+                stem.setAttribute("stroke", "#0a2614");
+                stem.setAttribute("stroke-width", "4");
+                stem.setAttribute("fill", "none");
+                stem.setAttribute("stroke-linecap", "round");
+                g.appendChild(stem);
+
+                const count = 16;
+                for (let i = 0; i < count; i++) {
+                    const t = i / count;
+                    const lx = w * t + (Math.random() - 0.5) * 22;
+                    const ly = h * t + (Math.random() - 0.5) * 22;
+                    const rx = 26 + Math.random() * 24;
+                    const ry = 16 + Math.random() * 14;
+
+                    const leaf = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    leaf.setAttribute("d", `M ${lx} ${ly} 
+                                            C ${lx + rx * 0.8} ${ly - ry * 1.3}, ${lx + rx * 1.7} ${ly + ry * 0.3}, ${lx + rx * 0.9} ${ly + ry * 1.9} 
+                                            C ${lx + rx * 0.1} ${ly + ry * 2.3}, ${lx - rx * 0.7} ${ly + ry * 1.1}, ${lx} ${ly} Z`);
+                    leaf.setAttribute("fill", mainGrad);
+                    leaf.setAttribute("stroke", "none");
+                    g.appendChild(leaf);
+
+                    const midrib = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    midrib.setAttribute("d", `M ${lx} ${ly} Q ${lx + rx * 0.45} ${ly + ry * 0.6} ${lx + rx * 0.9} ${ly + ry * 1.9}`);
+                    midrib.setAttribute("stroke", "#fef08a");
+                    midrib.setAttribute("stroke-width", "0.8");
+                    midrib.setAttribute("fill", "none");
+                    midrib.setAttribute("opacity", "0.35");
+                    g.appendChild(midrib);
+
+                    for (let v = 0; v < 3; v++) {
+                        const vt = (v + 1) / 4;
+                        const vx = lx + (rx * 0.9) * vt;
+                        const vy = ly + (ry * 1.9) * vt;
+                        const latVein = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        latVein.setAttribute("d", `M ${vx} ${vy} Q ${vx + 7} ${vy - 5} ${vx + 13} ${vy - 1}`);
+                        latVein.setAttribute("stroke", "#fef08a");
+                        latVein.setAttribute("stroke-width", "0.5");
+                        latVein.setAttribute("fill", "none");
+                        latVein.setAttribute("opacity", "0.22");
+                        g.appendChild(latVein);
+                    }
+                }
+                return g;
+            }
+
+            // 3. TILED COVERAGE CLUSTERS
+            const cols = 4;
+            const rows = 6;
+            const cellW = 400 / cols;
+            const cellH = 700 / rows;
+
+            let index = 0;
+            const centerX = 200;
+            const centerY = 350;
+
+            for (let r = -1; r <= rows; r++) {
+                for (let c = -1; c <= cols; c++) {
+                    index++;
+                    const layerKey = (index % 3 === 0) ? 'front' : ((index % 2 === 0) ? 'mid' : 'back');
+                    const svgContainer = layers[layerKey];
+
+                    const posX = c * cellW + (Math.random() - 0.5) * 30;
+                    const posY = r * cellH + (Math.random() - 0.5) * 30;
+                    const clusterW = 160 + Math.random() * 50;
+                    const clusterH = 160 + Math.random() * 50;
+                    const rot = (Math.random() - 0.5) * 180;
+
+                    const clusterGroup = createBotanicalPlantCluster(clusterW, clusterH);
+                    clusterGroup.setAttribute("class", "foliage-layer-group");
+                    clusterGroup.setAttribute("transform", `translate(${posX}, ${posY}) rotate(${rot}) scale(1)`);
+                    svgContainer.appendChild(clusterGroup);
+
+                    const dx = (posX + clusterW / 2) - centerX;
+                    const dy = (posY + clusterH / 2) - centerY;
+                    const distFromCenter = Math.hypot(dx, dy);
+                    const angle = Math.atan2(dy, dx);
+
+                    const isEdge = (posX < 30 || posX > 280 || posY < 50 || posY > 580);
+                    const pushDist = isEdge ? (20 + Math.random() * 25) : (290 + Math.random() * 110);
+
+                    const moveX = Math.cos(angle) * pushDist;
+                    const moveY = Math.sin(angle) * pushDist;
+                    const delay = Math.floor(distFromCenter * 2.2 + Math.random() * 90);
+
+                    clusterNodesData.push({
+                        element: clusterGroup,
+                        origTransform: `translate(${posX}, ${posY}) rotate(${rot}) scale(1)`,
+                        openTransform: `translate(${posX + moveX}, ${posY + moveY}) rotate(${rot + (Math.random() - 0.5) * 30}) scale(${isEdge ? 1 : 0.8})`,
+                        delay: delay,
+                        isEdge: isEdge
+                    });
+                }
+            }
+
+            // 4. CENTER OCCLUSION SHIELD CLUSTERS
+            for (let k = 0; k < 6; k++) {
+                const layerKey = (k % 2 === 0) ? 'front' : 'mid';
+                const svgContainer = layers[layerKey];
+
+                const posX = 90 + (k % 3) * 80;
+                const posY = 170 + Math.floor(k / 3) * 130;
+                const clusterGroup = createBotanicalPlantCluster(170, 170);
+                clusterGroup.setAttribute("class", "foliage-layer-group");
+                clusterGroup.setAttribute("transform", `translate(${posX}, ${posY}) scale(1.3)`);
+                svgContainer.appendChild(clusterGroup);
+
+                const dx = (posX + 85) - centerX;
+                const dy = (posY + 85) - centerY;
+                const angle = Math.atan2(dy, dx);
+                const moveX = Math.cos(angle) * 340;
+                const moveY = Math.sin(angle) * 340;
+
+                clusterNodesData.push({
+                    element: clusterGroup,
+                    origTransform: `translate(${posX}, ${posY}) scale(1.3)`,
+                    openTransform: `translate(${posX + moveX}, ${posY + moveY}) scale(0.75)`,
+                    delay: 140 + k * 80,
+                    isEdge: false
+                });
+            }
+        }
+
+        /* ==========================================================================
+           STATIC GAMEPLAY BOTANICAL FOLIAGE BACKGROUND (MATCHES OPENING FOLIAGE)
+           ========================================================================== */
+        function buildGameplayStaticFoliage() {
+            const defs = document.getElementById('gameplay-leaf-defs');
+            const group = document.getElementById('gameplay-foliage-group');
+            if (!defs || !group) return;
+
+            defs.innerHTML = `
+                <linearGradient id="gpGradForest" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#04180d" />
+                    <stop offset="50%" stop-color="#0e3d1f" />
+                    <stop offset="100%" stop-color="#185731" />
+                </linearGradient>
+                <linearGradient id="gpGradMoss" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0a1a05" />
+                    <stop offset="50%" stop-color="#223a0c" />
+                    <stop offset="100%" stop-color="#365314" />
+                </linearGradient>
+            `;
+
+            group.innerHTML = '';
+
+            // Render static edge foliage clusters around borders and corners
+            const edgePositions = [
+                { x: 10, y: 10, rot: -20, scale: 1.1 },
+                { x: 300, y: 10, rot: 35, scale: 1.2 },
+                { x: -20, y: 200, rot: 70, scale: 0.9 },
+                { x: 340, y: 240, rot: -80, scale: 0.9 },
+                { x: -10, y: 520, rot: -40, scale: 1.1 },
+                { x: 310, y: 540, rot: 50, scale: 1.2 },
+                { x: 120, y: -20, rot: 15, scale: 0.8 },
+                { x: 140, y: 620, rot: -15, scale: 0.8 }
+            ];
+
+            edgePositions.forEach((pos, idx) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("transform", `translate(${pos.x}, ${pos.y}) rotate(${pos.rot}) scale(${pos.scale})`);
+                g.setAttribute("opacity", "0.65");
+
+                const grad = (idx % 2 === 0) ? 'url(#gpGradForest)' : 'url(#gpGradMoss)';
+
+                // Stem
+                const stem = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                stem.setAttribute("d", "M 0 0 Q 50 30 100 100");
+                stem.setAttribute("stroke", "#061a0e");
+                stem.setAttribute("stroke-width", "3");
+                stem.setAttribute("fill", "none");
+                g.appendChild(stem);
+
+                // 8 Leaves
+                for (let l = 0; l < 8; l++) {
+                    const t = (l + 1) / 9;
+                    const lx = 100 * t;
+                    const ly = 100 * t * t;
+                    const leaf = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    leaf.setAttribute("d", `M ${lx} ${ly} C ${lx + 25} ${ly - 15}, ${lx + 40} ${ly + 10}, ${lx + 15} ${ly + 30} Z`);
+                    leaf.setAttribute("fill", grad);
+                    leaf.setAttribute("stroke", "none");
+                    g.appendChild(leaf);
+
+                    const vein = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    vein.setAttribute("d", `M ${lx} ${ly} Q ${lx + 15} ${ly + 8} ${lx + 15} ${ly + 30}`);
+                    vein.setAttribute("stroke", "#fef08a");
+                    vein.setAttribute("stroke-width", "0.6");
+                    vein.setAttribute("opacity", "0.25");
+                    vein.setAttribute("fill", "none");
+                    g.appendChild(vein);
+                }
+
+                group.appendChild(g);
+            });
+        }
+
+        /* ==========================================================================
+           CINEMATIC OPENING ANIMATION SEQUENCE
+           ========================================================================== */
+        function playCinematicOpening() {
+            const viewport = document.getElementById('opening-viewport');
+            const lightBurst = document.getElementById('opening-light-burst');
+            const apple = document.getElementById('opening-branch-apple');
+            const titleBox = document.getElementById('opening-title-container');
+
+            viewport.style.display = 'block';
+            titleBox.classList.remove('show');
+            apple.classList.remove('show');
+            lightBurst.style.opacity = '0';
+            lightBurst.style.transform = 'translate(-50%, -50%) scale(0.2)';
+
+            buildDenseWallOfFoliage();
+            buildGameplayStaticFoliage();
+
+            setTimeout(() => {
+                lightBurst.style.opacity = '0.5';
+            }, 500);
+
+            setTimeout(() => {
+                lightBurst.style.opacity = '1';
+                lightBurst.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                apple.classList.add('show');
+
+                clusterNodesData.forEach(node => {
+                    setTimeout(() => {
+                        node.element.style.transform = node.openTransform;
+                        if (!node.isEdge) {
+                            node.element.style.opacity = '0.08';
+                        }
+                    }, node.delay);
+                });
+            }, 1000);
+
+            setTimeout(() => {
+                titleBox.classList.add('show');
+            }, 2800);
+
+            setTimeout(() => {
+                titleBox.classList.remove('show');
+                apple.classList.remove('show');
+                lightBurst.style.opacity = '0';
+            }, 3800);
+
+            setTimeout(() => {
+                viewport.style.display = 'none';
+                showQuestionCard(currentQuestionIdx);
+            }, 4400);
+        }
+
+        /* ==========================================================================
+           DYNAMIC PLAYABLE AREA & BOUNDARY CALCULATION
+           ========================================================================== */
+        function getPlayableTopY() {
+            const bar = document.getElementById('active-question-bar');
+            const container = document.getElementById('game-container');
+            if (bar && bar.offsetWidth > 0 && window.getComputedStyle(bar).display !== 'none') {
+                const barRect = bar.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                const barBottomInContainer = barRect.bottom - containerRect.top;
+                return Math.max(120, barBottomInContainer + 20); // 20px safety gap
+            }
+            return 135; // Fallback default margin
+        }
+
+        /* ==========================================================================
+           GAME ENGINE STATE & CANVAS SETUP
+           ========================================================================== */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = 0;
+        let height = 0;
+        let lastTime = 0;
+        let isPaused = false;
+        let isMoving = false;
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let stars = 3;
+
+        // Snake Physics State
+        const snake = {
+            x: 0,
+            y: 0,
+            angle: -Math.PI / 2,
+            targetAngle: -Math.PI / 2,
+            baseSpeed: 135,
+            speed: 135,
+            turnSpeed: 6.8,
+            history: [],
+            targetLength: 150,
+            tongueTimer: 0
+        };
+
+        // Collectibles & Effects
+        let items = [];
+        let particles = [];
+        let ambientParticles = [];
+
+        let speedBoostTimer = 0;
+        let dizzyTimer = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        function initCanvas() {
+            const container = document.getElementById('game-container');
+            width = container.clientWidth;
+            height = container.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            ambientParticles = [];
+            for (let i = 0; i < 28; i++) {
+                ambientParticles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 2.0 + 0.8,
+                    alpha: Math.random() * 0.45 + 0.15,
+                    speedY: -(Math.random() * 10 + 6),
+                    speedX: (Math.random() - 0.5) * 6
+                });
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            initCanvas();
+            checkQuestionTruncation();
+            enforceSafePlayableBoundary();
+        });
+
+        function initializeGame() {
+            initCanvas();
+            score = 0;
+            stars = 3;
+            currentQuestionIdx = 0;
+            updateHUD();
+            setupControls();
+            setupExpandArrowListener();
+            playCinematicOpening();
+        }
+
+        /* ==========================================================================
+           QUESTION MANAGEMENT & EXPAND ARROW SYSTEM
+           ========================================================================== */
+        function setupExpandArrowListener() {
+            const btnExpand = document.getElementById('btn-toggle-expand');
+            const bar = document.getElementById('active-question-bar');
+
+            btnExpand.onclick = (e) => {
+                e.stopPropagation();
+                bar.classList.toggle('expanded');
+                btnExpand.textContent = bar.classList.contains('expanded') ? '▲' : '▼';
+
+                // Recalculate dynamic safe area immediately without pausing gameplay
+                enforceSafePlayableBoundary();
+            };
+        }
+
+        function checkQuestionTruncation() {
+            const textEl = document.getElementById('active-question-text');
+            const btnEl = document.getElementById('btn-toggle-expand');
+            const barEl = document.getElementById('active-question-bar');
+            if (!textEl || !btnEl || !barEl) return;
+
+            if (barEl.classList.contains('expanded')) {
+                btnEl.style.display = 'inline-flex';
+                btnEl.textContent = '▲';
+                return;
+            }
+
+            // Detect if question text actually overflows 2 lines
+            textEl.style.display = '-webkit-box';
+            if (textEl.scrollHeight > textEl.clientHeight + 2) {
+                btnEl.style.display = 'inline-flex';
+                btnEl.textContent = '▼';
+            } else {
+                btnEl.style.display = 'none';
+            }
+        }
+
+        function enforceSafePlayableBoundary() {
+            const topBoundary = getPlayableTopY();
+
+            // 1. Constrain Snake position if affected by expanded bar
+            if (snake.y < topBoundary) {
+                snake.y = topBoundary + 5;
+                if (snake.targetAngle < 0) snake.targetAngle = Math.PI / 2; // Steer down
+            }
+
+            // 2. Reposition items safely if covered by expanded bar
+            items.forEach(item => {
+                if (item.y < topBoundary + 18) {
+                    repositionItem(item);
+                }
+            });
+        }
+
+        function showQuestionCard(index) {
+            isMoving = false;
+            const q = QUESTIONS_DATA[index];
+            
+            document.getElementById('modal-q-title').textContent = `第 ${index + 1} 题`;
+            document.getElementById('modal-q-text').textContent = q.question;
+            
+            const listEl = document.getElementById('modal-options-list');
+            listEl.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const optDiv = document.createElement('div');
+                optDiv.className = 'option-card-item';
+                optDiv.innerHTML = `<div class="opt-badge">${opt.letter}</div><div>${opt.text}</div>`;
+                listEl.appendChild(optDiv);
+            });
+
+            // Set text on compact header bar
+            document.getElementById('active-question-text').textContent = `${index + 1}. ${q.question.replace(/\n+/g, ' ')}`;
+            document.getElementById('opt-preview-a').textContent = `A. ${q.options[0].text}`;
+            document.getElementById('opt-preview-b').textContent = `B. ${q.options[1].text}`;
+            document.getElementById('opt-preview-c').textContent = `C. ${q.options[2].text}`;
+            document.getElementById('opt-preview-d').textContent = `D. ${q.options[3].text}`;
+
+            // Reset expansion state for new question
+            const bar = document.getElementById('active-question-bar');
+            bar.classList.remove('expanded');
+
+            document.getElementById('question-modal').classList.add('active');
+            bar.style.display = 'none';
+        }
+
+        document.getElementById('btn-start-question').addEventListener('click', () => {
+            soundFX.init();
+            document.getElementById('question-modal').classList.remove('active');
+            const bar = document.getElementById('active-question-bar');
+            bar.style.display = 'block';
+
+            // Check if arrow is required for this question
+            setTimeout(() => {
+                checkQuestionTruncation();
+                enforceSafePlayableBoundary();
+            }, 50);
+
+            startCountdown();
+        });
+
+        function startCountdown() {
+            const layer = document.getElementById('countdown-layer');
+            const numEl = document.getElementById('countdown-num');
+            layer.classList.add('active');
+
+            let count = 3;
+            const updateNum = () => {
+                if (count > 0) {
+                    numEl.textContent = count;
+                    numEl.classList.remove('animate');
+                    void numEl.offsetWidth;
+                    numEl.classList.add('animate');
+                    count--;
+                    setTimeout(updateNum, 750);
+                } else {
+                    numEl.textContent = "开始！";
+                    numEl.classList.remove('animate');
+                    void numEl.offsetWidth;
+                    numEl.classList.add('animate');
+                    setTimeout(() => {
+                        layer.classList.remove('active');
+                        resetSnakePosition();
+                        spawnObjects();
+                        isMoving = true;
+                    }, 550);
+                }
+            };
+            updateNum();
+        }
+
+        function resetSnakePosition() {
+            const topBoundary = getPlayableTopY();
+            snake.x = width / 2;
+            snake.y = Math.max(topBoundary + 80, height * 0.72);
+            snake.angle = -Math.PI / 2;
+            snake.targetAngle = -Math.PI / 2;
+            snake.history = [];
+            
+            for (let i = 0; i < snake.targetLength; i += 3) {
+                snake.history.push({ x: snake.x, y: snake.y + i });
+            }
+        }
+
+        /* ==========================================================================
+           OBJECT SPAWNING & SAFE POSITIONING (DYNAMIC PlayableTopY RESPECTED)
+           ========================================================================== */
+        function spawnObjects() {
+            items = [];
+            const types = ['A', 'B', 'C', 'D', 'APPLE', 'MUSHROOM'];
+            const safeMarginX = 50;
+            const bottomMargin = 70;
+            
+            types.forEach(type => {
+                let pos = getSafePosition(safeMarginX, bottomMargin);
+                items.push({
+                    type: type,
+                    x: pos.x,
+                    y: pos.y,
+                    radius: 20,
+                    floatOffset: Math.random() * Math.PI * 2
+                });
+            });
+        }
+
+        function getSafePosition(marginX, marginBottom) {
+            let pos = { x: 0, y: 0 };
+            let valid = false;
+            let attempts = 0;
+
+            const dynamicTopY = getPlayableTopY() + 25; // Guarantee safety gap from active question bar
+
+            while (!valid && attempts < 100) {
+                attempts++;
+                pos.x = marginX + Math.random() * (width - marginX * 2);
+                pos.y = dynamicTopY + Math.random() * (height - dynamicTopY - marginBottom);
+
+                if (Math.hypot(pos.x - snake.x, pos.y - snake.y) < 95) continue;
+
+                let tooClose = false;
+                for (let item of items) {
+                    if (Math.hypot(pos.x - item.x, pos.y - item.y) < 65) {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose) valid = true;
+            }
+            return pos;
+        }
+
+        /* ==========================================================================
+           CONTROLS (TOUCH SWIPE + WASD / ARROWS)
+           ========================================================================== */
+        function setupControls() {
+            window.addEventListener('touchstart', (e) => {
+                if (!isMoving) return;
+                soundFX.init();
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+            }, { passive: true });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isMoving || !touchStartX) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                
+                if (Math.hypot(dx, dy) > 16) {
+                    snake.targetAngle = Math.atan2(dy, dx);
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                }
+            }, { passive: true });
+
+            const keysPressed = {};
+            window.addEventListener('keydown', (e) => {
+                soundFX.init();
+                keysPressed[e.key] = true;
+                handleKeyboardInput();
+            });
+
+            window.addEventListener('keyup', (e) => {
+                delete keysPressed[e.key];
+            });
+
+            function handleKeyboardInput() {
+                if (!isMoving) return;
+                let dx = 0, dy = 0;
+                if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) dy -= 1;
+                if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) dy += 1;
+                if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) dx -= 1;
+                if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) dx += 1;
+
+                if (dx !== 0 || dy !== 0) {
+                    snake.targetAngle = Math.atan2(dy, dx);
+                }
+            }
+        }
+
+        /* ==========================================================================
+           GAME LOOP & UPDATE PHYSICS
+           ========================================================================== */
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+            lastTime = timestamp;
+
+            if (!isPaused) {
+                update(dt);
+                render();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update(dt) {
+            ambientParticles.forEach(p => {
+                p.y += p.speedY * dt;
+                p.x += p.speedX * dt;
+                if (p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
+            });
+
+            if (!isMoving) return;
+
+            snake.tongueTimer += dt;
+
+            if (speedBoostTimer > 0) {
+                speedBoostTimer -= dt;
+                snake.speed = snake.baseSpeed * 1.85;
+                const pct = Math.max(0, (speedBoostTimer / 2.0) * 100);
+                document.getElementById('powerup-progress').style.width = pct + '%';
+                if (speedBoostTimer <= 0) {
+                    snake.speed = snake.baseSpeed;
+                    document.getElementById('powerup-timer-bar').style.display = 'none';
+                }
+            }
+
+            let dizzyAngleOffset = 0;
+            if (dizzyTimer > 0) {
+                dizzyTimer -= dt;
+                dizzyAngleOffset = Math.sin(Date.now() * 0.018) * 0.42;
+            }
+
+            let diff = (snake.targetAngle + dizzyAngleOffset) - snake.angle;
+            diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+            snake.angle += diff * Math.min(1, snake.turnSpeed * dt);
+
+            snake.x += Math.cos(snake.angle) * snake.speed * dt;
+            snake.y += Math.sin(snake.angle) * snake.speed * dt;
+
+            // DYNAMIC TOP BOUNDARY RESPECTS DYNAMIC QUESTION BAR HEIGHT
+            const margin = 20;
+            const topMargin = getPlayableTopY();
+            let bounced = false;
+
+            if (snake.x < margin) { snake.x = margin; snake.targetAngle = 0; bounced = true; }
+            if (snake.x > width - margin) { snake.x = width - margin; snake.targetAngle = Math.PI; bounced = true; }
+            if (snake.y < topMargin) { snake.y = topMargin; snake.targetAngle = Math.PI / 2; bounced = true; }
+            if (snake.y > height - margin) { snake.y = height - margin; snake.targetAngle = -Math.PI / 2; bounced = true; }
+
+            if (bounced) {
+                soundFX.playBounce();
+                score = Math.max(0, score - 5);
+                updateHUD();
+                createParticleBurst(snake.x, snake.y, '#d97706', 8);
+            }
+
+            snake.history.unshift({ x: snake.x, y: snake.y });
+
+            let totalDist = 0;
+            let pruneIndex = snake.history.length;
+            for (let i = 0; i < snake.history.length - 1; i++) {
+                const d = Math.hypot(
+                    snake.history[i+1].x - snake.history[i].x,
+                    snake.history[i+1].y - snake.history[i].y
+                );
+                totalDist += d;
+                if (totalDist >= snake.targetLength) {
+                    pruneIndex = i + 1;
+                    break;
+                }
+            }
+            if (pruneIndex < snake.history.length) {
+                snake.history.length = pruneIndex;
+            }
+
+            items.forEach((item) => {
+                item.floatOffset += dt * 3;
+                const floatY = item.y + Math.sin(item.floatOffset) * 4;
+                const dist = Math.hypot(snake.x - item.x, snake.y - floatY);
+
+                if (dist < 18 + item.radius) {
+                    handleItemCollision(item);
+                }
+            });
+
+            particles.forEach((p, index) => {
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.alpha -= dt * 1.8;
+                if (p.alpha <= 0) particles.splice(index, 1);
+            });
+        }
+
+        /* ==========================================================================
+           COLLISIONS & GAMEPLAY LOGIC
+           ========================================================================== */
+        function handleItemCollision(item) {
+            const q = QUESTIONS_DATA[currentQuestionIdx];
+
+            if (item.type === 'APPLE') {
+                activateApple();
+                repositionItem(item);
+            } else if (item.type === 'MUSHROOM') {
+                activateMushroom();
+                repositionItem(item);
+            } else {
+                handleAnswerChoice(item.type, q.correct);
+            }
+        }
+
+        function activateApple() {
+            soundFX.playSpeed();
+            speedBoostTimer = 2.0;
+            score += 10;
+            updateHUD();
+            document.getElementById('powerup-timer-bar').style.display = 'block';
+            showToast('速度提升！', 'toast-speed');
+            createParticleBurst(snake.x, snake.y, '#ffd700', 16);
+        }
+
+        function activateMushroom() {
+            soundFX.playDizzy();
+            dizzyTimer = 2.5;
+            stars = Math.max(0, stars - 1);
+            score = Math.max(0, score - 20);
+            updateHUD();
+            showToast('晕眩！', 'toast-dizzy');
+            createParticleBurst(snake.x, snake.y, '#a855f7', 16);
+        }
+
+        function handleAnswerChoice(chosenLetter, correctLetter) {
+            if (chosenLetter === correctLetter) {
+                soundFX.playCorrect();
+                isMoving = false;
+                score += 100;
+                updateHUD();
+                showToast('答对了！', 'toast-correct');
+                createParticleBurst(snake.x, snake.y, '#10b981', 30);
+
+                setTimeout(() => {
+                    currentQuestionIdx++;
+                    if (currentQuestionIdx >= QUESTIONS_DATA.length) {
+                        completeLevel3();
+                    } else {
+                        showQuestionCard(currentQuestionIdx);
+                    }
+                }, 1200);
+
+            } else {
+                soundFX.playWrong();
+                stars = Math.max(0, stars - 1);
+                score = Math.max(0, score - 20);
+                updateHUD();
+                showToast('答错了！', 'toast-wrong');
+                createParticleBurst(snake.x, snake.y, '#ef4444', 20);
+
+                spawnObjects();
+            }
+        }
+
+        function repositionItem(item) {
+            const pos = getSafePosition(50, 70);
+            item.x = pos.x;
+            item.y = pos.y;
+        }
+
+        function showToast(text, typeClass) {
+            const toast = document.getElementById('toast-banner');
+            toast.textContent = text;
+            toast.className = `show ${typeClass}`;
+            setTimeout(() => { toast.className = ''; }, 1200);
+        }
+
+        function createParticleBurst(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 150 + 40;
+                particles.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: color,
+                    radius: Math.random() * 3 + 2,
+                    alpha: 1.0
+                });
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-question-count').textContent = `第 ${currentQuestionIdx + 1} / 5 题`;
+            document.getElementById('hud-score-display').textContent = score;
+            let starStr = '';
+            for (let i = 0; i < 3; i++) { starStr += i < stars ? '★' : '☆'; }
+            document.getElementById('hud-stars-display').textContent = starStr;
+        }
+
+        /* ==========================================================================
+           CANVAS RENDERING (DARK BOTANICAL GARDEN ARENA & NATURAL SERPENT)
+           ========================================================================== */
+        function render() {
+            ctx.clearRect(0, 0, width, height);
+
+            // 1. Draw Ground Texture & Shadows
+            drawEdenGardenBackground();
+
+            // 2. Draw Subtle Eden Ambient Light Dust
+            ambientParticles.forEach(p => {
+                ctx.save();
+                ctx.fillStyle = '#fef08a';
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 3. Draw Collectibles (A, B, C, D, Apple, Mushroom)
+            items.forEach(item => { drawCollectible(item); });
+
+            // 4. Draw Natural Emerald/Forest Serpent Snake
+            drawSemiRealisticSnake();
+
+            // 5. Draw Particle FX
+            particles.forEach(p => {
+                ctx.save();
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        /* ==========================================================================
+           CANVAS GROUND BACKDROP
+           ========================================================================== */
+        function drawEdenGardenBackground() {
+            ctx.save();
+
+            // Base Layer: Dark Forest-Green Soil Radial Gradient
+            const bgGrad = ctx.createRadialGradient(width * 0.5, height * 0.4, 30, width * 0.5, height * 0.5, height * 0.85);
+            bgGrad.addColorStop(0, '#0d2818');  
+            bgGrad.addColorStop(0.5, '#061a10'); 
+            bgGrad.addColorStop(1, '#020804');   
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Organic Soil Patches
+            ctx.fillStyle = '#082414';
+            ctx.globalAlpha = 0.45;
+            ctx.beginPath();
+            ctx.ellipse(width * 0.3, height * 0.35, 140, 80, 0.2, 0, Math.PI * 2);
+            ctx.ellipse(width * 0.7, height * 0.65, 160, 90, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Restrained Top Sunlight Shaft
+            const rayGrad = ctx.createLinearGradient(width * 0.5, 0, width * 0.5, height * 0.55);
+            rayGrad.addColorStop(0, 'rgba(234, 179, 8, 0.08)');
+            rayGrad.addColorStop(1, 'rgba(234, 179, 8, 0)');
+            ctx.fillStyle = rayGrad;
+            ctx.beginPath();
+            ctx.moveTo(width * 0.25, 0);
+            ctx.lineTo(width * 0.75, 0);
+            ctx.lineTo(width * 0.9, height * 0.55);
+            ctx.lineTo(width * 0.1, height * 0.55);
+            ctx.closePath();
+            ctx.fill();
+
+            // Arena Border Accent
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.22)';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(10, 10, width - 20, height - 20);
+
+            ctx.restore();
+        }
+
+        /* ==========================================================================
+           RESTRAINED NATURAL FANTASY SERPENT RENDERING
+           ========================================================================== */
+        function drawSemiRealisticSnake() {
+            if (snake.history.length < 3) return;
+
+            ctx.save();
+
+            const points = snake.history;
+            const distances = [0];
+            let accumulated = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                const d = Math.hypot(points[i+1].x - points[i].x, points[i+1].y - points[i].y);
+                accumulated += d;
+                distances.push(accumulated);
+            }
+
+            function getSnakeBodyWidth(dist) {
+                if (dist < 12) return 14;
+                if (dist < 40) return 18;
+                if (dist < 100) return 14;
+                if (dist < 135) return 8;
+                return Math.max(2, 8 * (1 - (dist - 135) / 20));
+            }
+
+            // 1. Soft Dynamic Ground Shadow
+            ctx.beginPath();
+            for (let i = 0; i < points.length; i++) {
+                const pt = points[i];
+                if (i === 0) ctx.moveTo(pt.x + 6, pt.y + 10);
+                else ctx.lineTo(pt.x + 6, pt.y + 10);
+            }
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.lineWidth = 16;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            // 2. Snake Body Path
+            for (let i = points.length - 1; i >= 1; i--) {
+                const pt = points[i];
+                const prevPt = points[i - 1];
+                const dist = distances[i];
+                const w = getSnakeBodyWidth(dist);
+
+                const wave = Math.sin(dist * 0.08 - Date.now() * 0.006) * 2.2;
+                const angle = Math.atan2(prevPt.y - pt.y, prevPt.x - pt.x);
+                const perpX = -Math.sin(angle) * wave;
+                const perpY = Math.cos(angle) * wave;
+
+                ctx.beginPath();
+                ctx.arc(pt.x + perpX, pt.y + perpY, w / 2, 0, Math.PI * 2);
+
+                const bodyGrad = ctx.createRadialGradient(
+                    pt.x + perpX - w*0.2, pt.y + perpY - w*0.2, 1,
+                    pt.x + perpX, pt.y + perpY, w / 2
+                );
+                bodyGrad.addColorStop(0, '#3f6212');   
+                bodyGrad.addColorStop(0.4, '#15803d'); 
+                bodyGrad.addColorStop(1, '#052e16');   
+
+                ctx.fillStyle = bodyGrad;
+                ctx.fill();
+
+                if (i % 6 === 0 && dist > 15 && dist < 120) {
+                    ctx.fillStyle = 'rgba(234, 179, 8, 0.35)';
+                    ctx.beginPath();
+                    ctx.arc(pt.x + perpX, pt.y + perpY, w * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 3. Snake Head
+            const headPt = points[0];
+            ctx.save();
+            ctx.translate(headPt.x, headPt.y);
+            ctx.rotate(snake.angle);
+
+            ctx.beginPath();
+            ctx.moveTo(16, 0);
+            ctx.quadraticCurveTo(8, -12, -8, -10);
+            ctx.quadraticCurveTo(-14, 0, -8, 10);
+            ctx.quadraticCurveTo(8, 12, 16, 0);
+            ctx.closePath();
+
+            const headGrad = ctx.createRadialGradient(2, -2, 2, 0, 0, 16);
+            headGrad.addColorStop(0, '#22c55e');
+            headGrad.addColorStop(0.5, '#15803d');
+            headGrad.addColorStop(1, '#064e3b');
+            ctx.fillStyle = headGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#b8860b'; 
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Dark Eyes
+            ctx.fillStyle = '#0a0f1d';
+            ctx.beginPath();
+            ctx.arc(6, -6, 2.5, 0, Math.PI * 2);
+            ctx.arc(6, 6, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(7, -6.5, 0.8, 0, Math.PI * 2);
+            ctx.arc(7, 5.5, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tongue Flick
+            if (Math.sin(snake.tongueTimer * 8) > 0.6) {
+                ctx.strokeStyle = '#dc2626';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(16, 0);
+                ctx.lineTo(24, 0);
+                ctx.lineTo(28, -3);
+                ctx.moveTo(24, 0);
+                ctx.lineTo(28, 3);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        /* ==========================================================================
+           COLLECTIBLE OBJECTS RENDERING
+           ========================================================================== */
+        function drawCollectible(item) {
+            const floatY = item.y + Math.sin(item.floatOffset) * 4;
+
+            ctx.save();
+
+            ctx.beginPath();
+            ctx.ellipse(item.x, item.y + 18, 15, 5, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.fill();
+
+            if (item.type === 'APPLE') {
+                const grad = ctx.createRadialGradient(item.x - 4, floatY - 4, 2, item.x, floatY, 18);
+                grad.addColorStop(0, '#fca5a5');
+                grad.addColorStop(0.35, '#dc2626');
+                grad.addColorStop(1, '#450a0a');
+
+                ctx.beginPath();
+                ctx.arc(item.x, floatY, 16, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(220, 38, 38, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.ellipse(item.x + 4, floatY - 16, 6, 3, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#15803d';
+                ctx.fill();
+
+            } else if (item.type === 'MUSHROOM') {
+                const capGrad = ctx.createRadialGradient(item.x, floatY - 4, 2, item.x, floatY, 16);
+                capGrad.addColorStop(0, '#d8b4fe');
+                capGrad.addColorStop(0.5, '#7e22ce');
+                capGrad.addColorStop(1, '#3b0764');
+
+                ctx.beginPath();
+                ctx.arc(item.x, floatY, 16, Math.PI, 0);
+                ctx.fillStyle = capGrad;
+                ctx.shadowColor = 'rgba(126, 34, 206, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+
+                ctx.fillStyle = '#f3e8ff';
+                ctx.fillRect(item.x - 4, floatY, 8, 12);
+
+            } else {
+                let colorStops = ['#fb7185', '#be123c', '#4c0519'];
+                let glowColor = 'rgba(190, 18, 60, 0.5)';
+
+                if (item.type === 'B') { colorStops = ['#fcd34d', '#d97706', '#78350f']; glowColor = 'rgba(217, 119, 6, 0.5)'; }
+                if (item.type === 'C') { colorStops = ['#60a5fa', '#1d4ed8', '#1e3a8a']; glowColor = 'rgba(29, 78, 216, 0.5)'; }
+                if (item.type === 'D') { colorStops = ['#c084fc', '#7e22ce', '#3b0764']; glowColor = 'rgba(126, 34, 206, 0.5)'; }
+
+                const orbGrad = ctx.createRadialGradient(item.x - 5, floatY - 5, 2, item.x, floatY, 20);
+                orbGrad.addColorStop(0, colorStops[0]);
+                orbGrad.addColorStop(0.5, colorStops[1]);
+                orbGrad.addColorStop(1, colorStops[2]);
+
+                ctx.beginPath();
+                ctx.arc(item.x, floatY, 18, 0, Math.PI * 2);
+                ctx.fillStyle = orbGrad;
+                ctx.strokeStyle = '#d4af37'; 
+                ctx.lineWidth = 2;
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(item.type, item.x, floatY + 1);
+            }
+
+            ctx.restore();
+        }
+
+        /* ==========================================================================
+           MODAL MENUS & NAVIGATION (PAUSE / VICTORY / MAP PROGRESSION)
+           ========================================================================== */
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            isPaused = true;
+            document.getElementById('pause-modal').classList.add('active');
+        });
+
+        document.getElementById('btn-resume').addEventListener('click', () => {
+            isPaused = false;
+            document.getElementById('pause-modal').classList.remove('active');
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            document.getElementById('pause-modal').classList.remove('active');
+            restartLevel3();
+        });
+
+        document.getElementById('btn-quit').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('btn-victory-map').addEventListener('click', () => {
+            saveLevel3Progression();
+            window.location.href = 'index.html';
+        });
+
+        /* ==========================================================================
+           ROBUST LEVEL 3 COMPLETION & LEVEL 4 UNLOCK PROGRESSION SYSTEM
+           ========================================================================== */
+        function saveLevel3Progression() {
+            const STORAGE_KEY = 'game_level_progression_v1';
+            try {
+                let progress = null;
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        progress = JSON.parse(saved);
+                    } catch (e) {
+                        console.error("Error parsing game_level_progression_v1", e);
+                    }
+                }
+
+                if (!progress || typeof progress !== 'object') {
+                    progress = {
+                        levels: {
+                            1: { unlocked: true, completed: false, stars: 0, score: 0 }
+                        },
+                        achievements: [],
+                        stats: {
+                            totalScore: 0,
+                            levelsCompleted: 0
+                        }
+                    };
+                }
+
+                if (!progress.levels) {
+                    progress.levels = {};
+                }
+
+                // Level 3 details (unlocked and completed)
+                if (!progress.levels[3]) {
+                    progress.levels[3] = {};
+                }
+                progress.levels[3].unlocked = true;
+                progress.levels[3].completed = true;
+                progress.levels[3].score = score;
+                progress.levels[3].stars = stars;
+
+                // Level 4 details (unlocked, not completed)
+                if (!progress.levels[4]) {
+                    progress.levels[4] = {};
+                }
+                progress.levels[4].unlocked = true;
+                if (progress.levels[4].completed === undefined) {
+                    progress.levels[4].completed = false;
+                }
+
+                // Recalculate stats dynamically matching index.html logic
+                if (!progress.stats) {
+                    progress.stats = { totalScore: 0, levelsCompleted: 0 };
+                }
+
+                let totalScore = 0;
+                let completedCount = 0;
+                Object.keys(progress.levels).forEach(k => {
+                    const lvl = progress.levels[k];
+                    if (lvl && lvl.completed) completedCount++;
+                    if (lvl && lvl.score) totalScore += lvl.score;
+                });
+                progress.stats.totalScore = totalScore;
+                progress.stats.levelsCompleted = completedCount;
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+
+                // Backward compatibility keys
+                localStorage.setItem('level3_completed', 'true');
+                localStorage.setItem('level_3_complete', 'true');
+                localStorage.setItem('level3_complete', 'true');
+                localStorage.setItem('level3Completed', 'true');
+
+                let currentUnlocked = parseInt(localStorage.getItem('unlockedLevel') || '0', 10);
+                if (isNaN(currentUnlocked) || currentUnlocked < 4) {
+                    localStorage.setItem('unlockedLevel', '4');
+                }
+
+                let maxLevel = parseInt(localStorage.getItem('maxLevel') || '0', 10);
+                if (isNaN(maxLevel) || maxLevel < 4) {
+                    localStorage.setItem('maxLevel', '4');
+                }
+
+                let userLevel = parseInt(localStorage.getItem('userLevel') || '0', 10);
+                if (isNaN(userLevel) || userLevel < 4) {
+                    localStorage.setItem('userLevel', '4');
+                }
+
+                ['gameProgress', 'game_progress', 'educational_game_progress'].forEach(key => {
+                    try {
+                        let prog = JSON.parse(localStorage.getItem(key) || '{}');
+                        if (typeof prog === 'object') {
+                            prog.level3 = { completed: true, score: score, stars: stars };
+                            prog.level3_completed = true;
+                            if (!prog.unlockedLevel || prog.unlockedLevel < 4) {
+                                prog.unlockedLevel = 4;
+                            }
+                            localStorage.setItem(key, JSON.stringify(prog));
+                        }
+                    } catch(e) {}
+                });
+
+            } catch (e) {
+                console.warn("localStorage progression save error:", e);
+            }
+        }
+
+        function completeLevel3() {
+            isMoving = false;
+            
+            saveLevel3Progression();
+
+            document.getElementById('active-question-bar').style.display = 'none';
+            document.getElementById('victory-score').textContent = score;
+
+            let starStr = '';
+            for (let i = 0; i < 3; i++) { starStr += i < stars ? '★' : '☆'; }
+            document.getElementById('victory-stars').textContent = starStr;
+
+            setTimeout(() => {
+                document.getElementById('victory-modal').classList.add('active');
+            }, 600);
+        }
+
+        function restartLevel3() {
+            isPaused = false;
+            isMoving = false;
+            document.getElementById('victory-modal').classList.remove('active');
+            document.getElementById('pause-modal').classList.remove('active');
+            initializeGame();
+        }
+
+        window.addEventListener('load', () => {
+            initializeGame();
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
 </body>
 </html>
