@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>第3关 – 贪吃蛇 | 伊甸园历险记</title>
     <style>
         * {
@@ -17,6 +17,7 @@
         body, html {
             width: 100%;
             height: 100%;
+            height: 100dvh;
             overflow: hidden;
             background-color: #020503;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", serif;
@@ -31,6 +32,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             max-width: 520px;
             max-height: 925px;
             background: #040d07;
@@ -45,6 +47,7 @@
                 border-radius: 20px;
                 border: 2px solid rgba(212, 175, 55, 0.5);
                 height: 96vh;
+                height: 96dvh;
             }
         }
 
@@ -84,13 +87,13 @@
             z-index: 5;
         }
 
-        /* HUD Top Bar */
+        /* HUD Top Bar with Mobile Safe Area Support */
         #hud-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 12px 16px;
+            padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -148,10 +151,10 @@
             transform: scale(0.92);
         }
 
-        /* Active Question Compact Header Bar with Expand Arrow */
+        /* Active Question Compact Header Bar synchronized with HUD position */
         #active-question-bar {
             position: absolute;
-            top: 58px;
+            top: calc(env(safe-area-inset-top, 0px) + 64px);
             left: 50%;
             transform: translateX(-50%);
             width: 92%;
@@ -243,7 +246,7 @@
         /* Responsive UI Adjustments for Mobile Viewports */
         @media (max-width: 480px) {
             #hud-container {
-                padding: 8px 10px;
+                padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px 6px 10px;
             }
             .hud-group {
                 gap: 6px;
@@ -263,7 +266,7 @@
                 font-size: 0.95rem;
             }
             #active-question-bar {
-                top: 48px;
+                top: calc(env(safe-area-inset-top, 0px) + 54px);
                 width: 95%;
                 padding: 6px 10px;
             }
@@ -303,7 +306,7 @@
 
         @media (max-width: 360px) {
             #hud-container {
-                padding: 6px 6px;
+                padding: calc(env(safe-area-inset-top, 0px) + 8px) 6px 4px 6px;
             }
             .hud-badge {
                 padding: 3px 6px;
@@ -313,7 +316,7 @@
                 font-size: 0.85rem;
             }
             #active-question-bar {
-                top: 42px;
+                top: calc(env(safe-area-inset-top, 0px) + 48px);
                 padding: 5px 8px;
             }
             #active-question-text {
