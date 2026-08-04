@@ -104,35 +104,6 @@
             margin-top: 4px;
         }
 
-        /* Interactive Chest Prompt Button */
-        #interact-btn {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
-            color: #1a0f00;
-            border: 2px solid #fff5cc;
-            border-radius: 50px;
-            padding: 14px 28px;
-            font-size: 15px;
-            font-weight: bold;
-            font-family: inherit;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.6);
-            cursor: pointer;
-            z-index: 30;
-            display: none;
-            animation: pulse-btn 1.2s infinite alternate;
-        }
-
-        @keyframes pulse-btn {
-            from { transform: scale(1); }
-            to { transform: scale(1.06); }
-        }
-
-        #interact-btn:active {
-            transform: scale(0.95);
-        }
-
         /* Modal Overlays (Stone Tablet) */
         .modal-overlay {
             position: absolute;
@@ -439,9 +410,6 @@
         <!-- Notification Toast -->
         <div id="toast-banner">提示信息</div>
 
-        <!-- Interactive Chest Button -->
-        <button id="interact-btn" onclick="triggerChestInteraction()">📦 开启宝箱</button>
-
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
 
@@ -644,6 +612,10 @@
 
         const chestSparkles = [];
 
+        // Track touch start for tap vs drag detection
+        let touchStartPos = { x: 0, y: 0 };
+        let touchStartTime = 0;
+
         // ==========================================
         // 3. ENGINE & CANVAS SETUP
         // ==========================================
@@ -737,23 +709,25 @@
         }
 
         // ==========================================
-        // FULL-SCREEN DRAG MOVEMENT HANDLERS
+        // FULL-SCREEN DRAG & TAP MOVEMENT HANDLERS
         // ==========================================
         window.addEventListener('touchstart', (e) => {
             if (!isTouchDevice) {
                 isTouchDevice = true;
-                document.getElementById('control-hint').innerText = '按住屏幕拖动 控制角色移动';
+                document.getElementById('control-hint').innerText = '按住屏幕拖动 控制角色移动 | 点击宝箱进行互动';
             }
 
             if (!isGameControlActive || isQuestionActive || isLevelCompleted) return;
 
-            // Ignore touches on UI overlays or buttons
-            if (e.target.closest('.modal-overlay') || e.target.closest('#interact-btn') || e.target.closest('#hud-container')) {
+            // Ignore touches on UI overlays
+            if (e.target.closest('.modal-overlay') || e.target.closest('#hud-container')) {
                 return;
             }
 
             const touch = e.changedTouches[0];
             activeTouchId = touch.identifier;
+            touchStartPos = { x: touch.clientX, y: touch.clientY };
+            touchStartTime = Date.now();
             updateTouchVector(touch);
         }, { passive: false });
 
@@ -771,6 +745,15 @@
             if (activeTouchId === null) return;
             for (let i = 0; i < e.changedTouches.length; i++) {
                 if (e.changedTouches[i].identifier === activeTouchId) {
+                    const touch = e.changedTouches[i];
+                    const moveDist = Math.hypot(touch.clientX - touchStartPos.x, touch.clientY - touchStartPos.y);
+                    const duration = Date.now() - touchStartTime;
+
+                    // Tap Detection: short duration & minimal displacement
+                    if (moveDist < 18 && duration < 350) {
+                        tryInteractWithChestAtScreenPos(touch.clientX, touch.clientY);
+                    }
+
                     touchMoveDir = { x: 0, y: 0 };
                     activeTouchId = null;
                     break;
@@ -800,13 +783,48 @@
             }
         }
 
+        // Direct Chest Click & Tap Interaction Handling
+        function tryInteractWithChestAtScreenPos(screenX, screenY) {
+            if (!isGameControlActive || isQuestionActive || isLevelCompleted) return;
+
+            // Convert screen coordinates to world position
+            const worldX = screenX - viewportWidth / 2 + camera.x;
+            const worldY = screenY - viewportHeight / 2 + camera.y;
+
+            for (let i = 0; i < CHESTS_DATA.length; i++) {
+                const chest = CHESTS_DATA[i];
+                if (chest.opened) continue;
+
+                const cPx = (chest.gridX + 0.5) * tilePixelSize;
+                const cPy = (chest.gridY + 0.5) * tilePixelSize;
+
+                const distToTap = Math.hypot(worldX - cPx, worldY - cPy);
+                const distToPlayer = Math.hypot(player.x - cPx, player.y - cPy);
+
+                // Tap hit chest area AND player is close enough to chest
+                if (distToTap <= tilePixelSize * 1.3 && distToPlayer <= tilePixelSize * 2.0) {
+                    triggerChestInteraction(chest);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Desktop Mouse Click
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            tryInteractWithChestAtScreenPos(screenX, screenY);
+        });
+
         // Keyboard Event Listeners (Desktop)
         window.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
-                if (!keys[' '] && isGameControlActive) {
+                if (!keys[' '] && isGameControlActive && activeChest) {
                     keys[' '] = true;
-                    triggerChestInteraction();
+                    triggerChestInteraction(activeChest);
                 }
             } else if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) {
                 keys[e.key] = true;
@@ -816,10 +834,6 @@
         window.addEventListener('keyup', (e) => {
             if (e.key === ' ' || e.code === 'Space') keys[' '] = false;
             else if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = false;
-        });
-
-        canvas.addEventListener('click', () => {
-            if (activeChest && !isQuestionActive && isGameControlActive) triggerChestInteraction();
         });
 
         function showToast(msg, isWrong = false) {
@@ -880,7 +894,7 @@
             camera.x += (player.x - camera.x) * 0.1;
             camera.y += (player.y - camera.y) * 0.1;
 
-            // Check Proximity to Locked Chests for Interaction
+            // Check Proximity to Locked Chests for Soft Glow Visual Cue
             let nearChest = null;
             let nearIndex = -1;
 
@@ -889,7 +903,7 @@
                 const cPy = (chest.gridY + 0.5) * tilePixelSize;
                 const dist = Math.hypot(player.x - cPx, player.y - cPy);
 
-                if (dist < tilePixelSize * 1.5 && !chest.opened) {
+                if (dist < tilePixelSize * 1.8 && !chest.opened) {
                     nearChest = chest;
                     nearIndex = idx;
                 }
@@ -897,16 +911,6 @@
 
             activeChest = nearChest;
             activeChestIndex = nearIndex;
-
-            const interactBtn = document.getElementById('interact-btn');
-            if (activeChest) {
-                interactBtn.style.display = 'block';
-                const isMobilePrompt = isTouchDevice || ('ontouchstart' in window);
-                const promptText = isMobilePrompt ? '【点击开启宝箱】' : '【按 SPACE 开启宝箱】';
-                interactBtn.innerText = `📦 宝箱 ${activeChest.label} ${promptText}`;
-            } else {
-                interactBtn.style.display = 'none';
-            }
 
             // Exit Portal Interaction
             const currentGridX = Math.floor(player.x / tilePixelSize);
@@ -1001,11 +1005,12 @@
         // ==========================================
         // 5. INTERACTION & QUESTION AUDIO LOGIC
         // ==========================================
-        function triggerChestInteraction() {
-            if (activeChest && !isQuestionActive && !activeChest.opened && isGameControlActive) {
+        function triggerChestInteraction(chestToOpen) {
+            const targetChest = chestToOpen || activeChest;
+            if (targetChest && !isQuestionActive && !targetChest.opened && isGameControlActive) {
                 stopFootsteps();
                 playSFX(sounds.chestInteract);
-                showQuestionModal(activeChest);
+                showQuestionModal(targetChest);
             }
         }
 
@@ -1045,9 +1050,10 @@
             if (selectedIndex === chest.correctIndex) {
                 playSFX(sounds.correctAnswer);
 
+                // Wait 300ms then play the bell unlocking sound
                 setTimeout(() => {
                     playSFX(sounds.bell);
-                }, 200);
+                }, 300);
 
                 document.getElementById('question-modal').classList.remove('active');
                 isQuestionActive = false;
@@ -1246,7 +1252,7 @@
             drawEmbers();
         }
 
-        // Render Animated Treasure Chests
+        // Render Animated Treasure Chests with Soft Glow Proximity Cue
         function drawTreasureChest(chest) {
             const px = chest.gridX * tilePixelSize;
             const py = chest.gridY * tilePixelSize;
@@ -1258,9 +1264,23 @@
 
             ctx.save();
 
-            const breathe = Math.sin(Date.now() * 0.004) * 3;
-            ctx.shadowColor = chest.opened ? '#ffd700' : '#d4af37';
-            ctx.shadowBlur = chest.opened ? 16 : 10 + breathe;
+            const isNearUnopened = !chest.opened && (activeChest === chest);
+            const breathe = Math.sin(Date.now() * 0.005) * 4;
+
+            // Soft glowing aura when player is near unopened chest
+            if (isNearUnopened) {
+                ctx.save();
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 22 + breathe * 2;
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.18)';
+                ctx.beginPath();
+                ctx.arc(cx, cy, size * 0.65, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            ctx.shadowColor = chest.opened ? '#ffd700' : (isNearUnopened ? '#ffd700' : '#d4af37');
+            ctx.shadowBlur = chest.opened ? 16 : (isNearUnopened ? 18 + breathe : 10 + breathe);
 
             const boxW = size * 0.68;
             const boxH = size * 0.46;
@@ -1270,8 +1290,8 @@
             ctx.fillStyle = chest.opened ? '#4a321a' : '#332111';
             ctx.fillRect(boxX, boxY, boxW, boxH);
 
-            ctx.strokeStyle = '#d4af37';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = isNearUnopened ? '#fff5cc' : '#d4af37';
+            ctx.lineWidth = isNearUnopened ? 2.5 : 2;
             ctx.strokeRect(boxX, boxY, boxW, boxH);
 
             if (chest.opened) {
