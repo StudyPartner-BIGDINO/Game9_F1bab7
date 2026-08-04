@@ -133,40 +133,6 @@
             transform: scale(0.95);
         }
 
-        /* Virtual Joystick */
-        #joystick-zone {
-            position: absolute;
-            bottom: 24px;
-            left: 24px;
-            width: 130px;
-            height: 130px;
-            z-index: 20;
-            display: none;
-        }
-
-        #joystick-base {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(35, 29, 23, 0.7) 0%, rgba(15, 12, 10, 0.85) 100%);
-            border: 2px solid rgba(197, 160, 89, 0.5);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-        }
-
-        #joystick-stick {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            top: 41px;
-            left: 41px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #f3e5ab 0%, #c5a059 60%, #7a5c1e 100%);
-            border: 2px solid #fff5cc;
-            box-shadow: 0 0 12px rgba(243, 229, 171, 0.6);
-            transition: transform 0.05s ease-out;
-        }
-
         /* Modal Overlays (Stone Tablet) */
         .modal-overlay {
             position: absolute;
@@ -467,7 +433,7 @@
                 <div class="chest-badge" id="badge-5">☐⑤</div>
                 <div class="chest-badge" id="badge-6">☐⑥</div>
             </div>
-            <div class="hud-subtitle" id="control-hint">使用 WASD / 方向键 或 摇杆，靠近宝箱按 空格键 开启</div>
+            <div class="hud-subtitle" id="control-hint">使用 WASD / 方向键 或 按住屏幕拖动 控制角色移动</div>
         </div>
 
         <!-- Notification Toast -->
@@ -478,12 +444,6 @@
 
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
-
-        <!-- Virtual Joystick for Mobile -->
-        <div id="joystick-zone">
-            <div id="joystick-base"></div>
-            <div id="joystick-stick"></div>
-        </div>
 
         <!-- CINEMATIC INTRO OVERLAY -->
         <div class="modal-overlay active" id="intro-overlay">
@@ -560,7 +520,6 @@
             levelCompleted: new Audio('game-level-completed.wav')
         };
 
-        // Configure Sound Parameters
         sounds.bgm.loop = true;
         sounds.bgm.volume = 0.3;
 
@@ -705,8 +664,11 @@
 
         const camera = { x: player.x, y: player.y };
         const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false, ' ': false };
-        let joystickDir = { x: 0, y: 0 };
         let isTouchDevice = false;
+
+        // Full-screen Drag Controls State
+        let touchMoveDir = { x: 0, y: 0 };
+        let activeTouchId = null;
 
         const embers = Array.from({ length: 30 }, () => ({
             x: Math.random() * window.innerWidth,
@@ -755,7 +717,6 @@
         });
 
         function startMazeExploration() {
-            // Start BGM playback after explicit user press
             sounds.bgm.play().catch(e => console.warn(e));
 
             const introOverlay = document.getElementById('intro-overlay');
@@ -775,17 +736,71 @@
             }, 600);
         }
 
-        window.addEventListener('touchstart', () => {
+        // ==========================================
+        // FULL-SCREEN DRAG MOVEMENT HANDLERS
+        // ==========================================
+        window.addEventListener('touchstart', (e) => {
             if (!isTouchDevice) {
                 isTouchDevice = true;
-                if (isGameControlActive) {
-                    document.getElementById('joystick-zone').style.display = 'block';
-                }
-                document.getElementById('control-hint').innerText = '靠近宝箱时点击 开启 按钮解答试炼';
+                document.getElementById('control-hint').innerText = '按住屏幕拖动 控制角色移动';
             }
-        }, { once: true });
 
-        // Keyboard Event Listeners
+            if (!isGameControlActive || isQuestionActive || isLevelCompleted) return;
+
+            // Ignore touches on UI overlays or buttons
+            if (e.target.closest('.modal-overlay') || e.target.closest('#interact-btn') || e.target.closest('#hud-container')) {
+                return;
+            }
+
+            const touch = e.changedTouches[0];
+            activeTouchId = touch.identifier;
+            updateTouchVector(touch);
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            if (activeTouchId === null) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === activeTouchId) {
+                    updateTouchVector(e.changedTouches[i]);
+                    break;
+                }
+            }
+        }, { passive: false });
+
+        const resetTouchMovement = (e) => {
+            if (activeTouchId === null) return;
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === activeTouchId) {
+                    touchMoveDir = { x: 0, y: 0 };
+                    activeTouchId = null;
+                    break;
+                }
+            }
+        };
+
+        window.addEventListener('touchend', resetTouchMovement);
+        window.addEventListener('touchcancel', resetTouchMovement);
+
+        function updateTouchVector(touch) {
+            const playerScreenX = viewportWidth / 2 + (player.x - camera.x);
+            const playerScreenY = viewportHeight / 2 + (player.y - camera.y);
+
+            const dx = touch.clientX - playerScreenX;
+            const dy = touch.clientY - playerScreenY;
+            const dist = Math.hypot(dx, dy);
+
+            const deadZone = 12; // Small deadzone around player center
+            if (dist < deadZone) {
+                touchMoveDir = { x: 0, y: 0 };
+            } else {
+                touchMoveDir = {
+                    x: dx / dist,
+                    y: dy / dist
+                };
+            }
+        }
+
+        // Keyboard Event Listeners (Desktop)
         window.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
@@ -802,55 +817,6 @@
             if (e.key === ' ' || e.code === 'Space') keys[' '] = false;
             else if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = false;
         });
-
-        // Joystick Event Handlers
-        const joystickZone = document.getElementById('joystick-zone');
-        const joystickStick = document.getElementById('joystick-stick');
-        let joystickTouchId = null;
-        let joystickCenter = { x: 0, y: 0 };
-
-        joystickZone.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.changedTouches[0];
-            joystickTouchId = touch.identifier;
-            const rect = joystickZone.getBoundingClientRect();
-            joystickCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-            updateJoystick(touch);
-        });
-
-        joystickZone.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === joystickTouchId) {
-                    updateJoystick(e.changedTouches[i]);
-                    break;
-                }
-            }
-        });
-
-        const resetJoystick = () => {
-            joystickDir = { x: 0, y: 0 };
-            joystickStick.style.transform = `translate(0px, 0px)`;
-            joystickTouchId = null;
-        };
-
-        joystickZone.addEventListener('touchend', resetJoystick);
-        joystickZone.addEventListener('touchcancel', resetJoystick);
-
-        function updateJoystick(touch) {
-            const dx = touch.clientX - joystickCenter.x;
-            const dy = touch.clientY - joystickCenter.y;
-            const dist = Math.hypot(dx, dy);
-            const maxRadius = 42;
-            const angle = Math.atan2(dy, dx);
-            const moveDist = Math.min(dist, maxRadius);
-
-            const moveX = Math.cos(angle) * moveDist;
-            const moveY = Math.sin(angle) * moveDist;
-
-            joystickStick.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            joystickDir = { x: moveX / maxRadius, y: moveY / maxRadius };
-        }
 
         canvas.addEventListener('click', () => {
             if (activeChest && !isQuestionActive && isGameControlActive) triggerChestInteraction();
@@ -875,15 +841,19 @@
             }
 
             let moveX = 0, moveY = 0;
+
+            // Keyboard input
             if (keys.w || keys.ArrowUp) moveY -= 1;
             if (keys.s || keys.ArrowDown) moveY += 1;
             if (keys.a || keys.ArrowLeft) moveX -= 1;
             if (keys.d || keys.ArrowRight) moveX += 1;
 
-            if (joystickDir.x !== 0 || joystickDir.y !== 0) {
-                moveX = joystickDir.x;
-                moveY = joystickDir.y;
+            // Mobile full-screen drag input
+            if (touchMoveDir.x !== 0 || touchMoveDir.y !== 0) {
+                moveX = touchMoveDir.x;
+                moveY = touchMoveDir.y;
             } else if (moveX !== 0 && moveY !== 0) {
+                // Normalize diagonal keyboard speed
                 const len = Math.hypot(moveX, moveY);
                 moveX /= len;
                 moveY /= len;
@@ -960,7 +930,6 @@
 
                         document.getElementById('victory-modal').classList.add('active');
 
-                        // Play Level Completion Audio after victory modal animation completes (~350ms)
                         setTimeout(() => {
                             playSFX(sounds.levelCompleted);
                         }, 350);
@@ -1042,7 +1011,8 @@
 
         function showQuestionModal(chest) {
             isQuestionActive = true;
-            resetJoystick();
+            touchMoveDir = { x: 0, y: 0 };
+            activeTouchId = null;
 
             document.getElementById('q-header').innerText = `📜 宝箱 ${chest.label} 历史试炼`;
             document.getElementById('q-text').innerText = chest.text;
@@ -1073,7 +1043,6 @@
 
         function handleAnswerChoice(selectedIndex, chest, btnElement) {
             if (selectedIndex === chest.correctIndex) {
-                // Correct Choice -> Correct Sound -> Bell Sound (0.2s later) -> Chest Opens
                 playSFX(sounds.correctAnswer);
 
                 setTimeout(() => {
@@ -1101,7 +1070,6 @@
                     showToast(`🎉 宝箱 ${chest.label} 已开启！通路已解锁！`);
                 }
             } else {
-                // Wrong Choice -> Wrong SFX -> Red Flash & Tablet Shake
                 playSFX(sounds.wrongAnswer);
 
                 btnElement.classList.add('wrong-flash');
@@ -1278,7 +1246,7 @@
             drawEmbers();
         }
 
-        // Render Animated Treasure Chests with Floating / Breathing Effects
+        // Render Animated Treasure Chests
         function drawTreasureChest(chest) {
             const px = chest.gridX * tilePixelSize;
             const py = chest.gridY * tilePixelSize;
