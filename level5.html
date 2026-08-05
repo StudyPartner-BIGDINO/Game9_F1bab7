@@ -89,6 +89,34 @@
             pointer-events: none;
         }
 
+        /* Loading Bar CSS */
+        .loading-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--parchment-border);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            margin: 18px 0 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .loading-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #b8860b 0%, #ffd700 100%);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            transition: width 0.3s ease-out;
+        }
+
+        .loading-percent-text {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
         /* UI Buttons */
         .btn-gold {
             background: linear-gradient(135deg, #ffd700 0%, #c59b27 100%);
@@ -651,6 +679,19 @@
         </div>
     </div>
 
+    <!-- Loading Screen Overlay -->
+    <div id="loading-screen" class="overlay-screen hidden">
+        <div class="parchment-card" style="max-width: 380px;">
+            <h2 style="color: var(--gold-primary); font-size: 1.4rem; margin-bottom: 6px;">Loading Ancient Archive...</h2>
+            <div style="color: #f3e5ab; font-size: 1.1rem; letter-spacing: 2px;">正在整理古代档案...</div>
+            
+            <div class="loading-bar-container">
+                <div id="loading-bar-fill" class="loading-bar-fill"></div>
+            </div>
+            <div id="loading-percent" class="loading-percent-text">0%</div>
+        </div>
+    </div>
+
     <!-- 2. Mission Instruction Screen -->
     <div id="mission-screen" class="overlay-screen hidden">
         <div class="parchment-card">
@@ -1052,6 +1093,7 @@
 
         // DOM Elements
         const openingScreen = document.getElementById('opening-screen');
+        const loadingScreen = document.getElementById('loading-screen');
         const missionScreen = document.getElementById('mission-screen');
         const startMissionBtn = document.getElementById('start-mission-btn');
         const searchContainer = document.getElementById('search-container');
@@ -1084,37 +1126,120 @@
         // Initialize Audio UI state from saved preference
         updateAudioUI();
 
+        let openingTransitioned = false;
+        function transitionFromOpeningToLoading() {
+            if (openingTransitioned) return;
+            openingTransitioned = true;
+            openingScreen.classList.add('hidden');
+            loadingScreen.classList.remove('hidden');
+            startLoadingProcess();
+        }
+
         // Opening Animation Sequence
         window.addEventListener('load', () => {
             // Attempt to play opening cinematic audio
             audioMgr.playOpening();
 
             setTimeout(() => {
-                openingScreen.classList.add('hidden');
-                missionScreen.classList.remove('hidden');
+                transitionFromOpeningToLoading();
             }, 2600);
 
             openingScreen.addEventListener('click', () => {
-                openingScreen.classList.add('hidden');
-                missionScreen.classList.remove('hidden');
+                transitionFromOpeningToLoading();
             });
         });
+
+        // Loading Screen & Preloader Process
+        let isLoadingStarted = false;
+        function startLoadingProcess() {
+            if (isLoadingStarted) return;
+            isLoadingStarted = true;
+
+            const fillEl = document.getElementById('loading-bar-fill');
+            const percentEl = document.getElementById('loading-percent');
+
+            const imagesToLoad = ['level5_coin.png', 'level5_stamp.png'];
+            const audioToLoad = [
+                'level5_bgm.mp3',
+                'level5_open.mp3',
+                'level5_coin_tap.mp3',
+                'level5_seal_found.mp3',
+                'level5_wrong.wav',
+                'level5_correct-answer.wav',
+                'game-level-completed.wav'
+            ];
+
+            const totalSteps = imagesToLoad.length + audioToLoad.length + 1; // 2 + 7 + 1 (board generation)
+            let completedSteps = 0;
+
+            function advanceProgress() {
+                completedSteps++;
+                const pct = Math.min(100, Math.floor((completedSteps / totalSteps) * 100));
+                fillEl.style.width = pct + '%';
+                percentEl.textContent = pct + '%';
+
+                if (completedSteps >= totalSteps) {
+                    fillEl.style.width = '100%';
+                    percentEl.textContent = '100%';
+                    
+                    // After loading reaches 100%, wait about 800ms, then fade out smoothly and show Mission Screen
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                        setTimeout(() => {
+                            missionScreen.classList.remove('hidden');
+                        }, 500);
+                    }, 800);
+                }
+            }
+
+            // Preload Images
+            imagesToLoad.forEach(src => {
+                const img = new Image();
+                img.onload = advanceProgress;
+                img.onerror = advanceProgress;
+                img.src = src;
+            });
+
+            // Preload Audios
+            audioToLoad.forEach(src => {
+                const audio = new Audio();
+                audio.preload = 'auto';
+                let done = false;
+                const handleDone = () => {
+                    if (!done) {
+                        done = true;
+                        advanceProgress();
+                    }
+                };
+                audio.addEventListener('canplaythrough', handleDone, { once: true });
+                audio.addEventListener('loadeddata', handleDone, { once: true });
+                audio.addEventListener('error', handleDone, { once: true });
+                audio.src = src;
+                audio.load();
+                setTimeout(handleDone, 1200); // Safety fallback timeout
+            });
+
+            // Prepare resources and render entire search board with 606 objects
+            setTimeout(() => {
+                prepareBoardDataAndRender();
+                advanceProgress();
+            }, 100);
+        }
 
         // Start Mission Event
         startMissionBtn.addEventListener('click', () => {
             missionScreen.classList.add('hidden');
             audioMgr.init();
-            initGame();
+            startTimer();
         });
 
-        // Initialize / Reset Level Game
-        function initGame() {
+        // Prepare Game Data & Pre-render Board
+        function prepareBoardDataAndRender() {
             completedCount = 0;
             secondsElapsed = 0;
             isPaused = false;
             updateHUDProgress();
             updateTimerDisplay();
-            startTimer();
 
             // Prepare total objects dynamically based on configuration constants
             itemsData = [];
@@ -1150,6 +1275,12 @@
 
             generateScatterLayout();
             renderBoard();
+        }
+
+        // Initialize / Reset Level Game
+        function initGame() {
+            prepareBoardDataAndRender();
+            startTimer();
         }
 
         // Fully Dynamic Scattering Algorithm (Adapts automatically to any NORMAL_COIN_COUNT)
