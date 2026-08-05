@@ -605,6 +605,7 @@
         let activeChest = null;
         let activeChestIndex = -1;
         let isQuestionActive = false;
+        let modalOpenTime = 0; // Timestamp when question modal opens
         let isExitUnlocked = false;
         let isLevelCompleted = false;
 
@@ -751,7 +752,10 @@
 
                     // Tap Detection: short duration & minimal displacement
                     if (moveDist < 18 && duration < 350) {
-                        tryInteractWithChestAtScreenPos(touch.clientX, touch.clientY);
+                        if (tryInteractWithChestAtScreenPos(touch.clientX, touch.clientY)) {
+                            // Prevent synthesized mouse click events on modal buttons
+                            if (e.cancelable) e.preventDefault();
+                        }
                     }
 
                     touchMoveDir = { x: 0, y: 0 };
@@ -785,7 +789,7 @@
 
         // Direct Chest Click & Tap Interaction Handling
         function tryInteractWithChestAtScreenPos(screenX, screenY) {
-            if (!isGameControlActive || isQuestionActive || isLevelCompleted) return;
+            if (!isGameControlActive || isQuestionActive || isLevelCompleted) return false;
 
             // Convert screen coordinates to world position
             const worldX = screenX - viewportWidth / 2 + camera.x;
@@ -1016,6 +1020,7 @@
 
         function showQuestionModal(chest) {
             isQuestionActive = true;
+            modalOpenTime = Date.now(); // Record time when modal was presented
             touchMoveDir = { x: 0, y: 0 };
             activeTouchId = null;
 
@@ -1047,6 +1052,11 @@
         }
 
         function handleAnswerChoice(selectedIndex, chest, btnElement) {
+            // Guard against touch bleed-through / synthesized ghost clicks immediately after opening modal
+            if (Date.now() - modalOpenTime < 350) {
+                return;
+            }
+
             if (selectedIndex === chest.correctIndex) {
                 playSFX(sounds.correctAnswer);
 
