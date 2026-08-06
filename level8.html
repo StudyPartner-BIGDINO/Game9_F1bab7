@@ -6,7 +6,7 @@
     <title>LEVEL 8 - 解开历史之绳</title>
     <style>
         /* ==================================================
-           RESET & BASIC STYLES
+           RESET & VIEWPORT SCROLL LOCK
            ================================================== */
         * {
             box-sizing: border-box;
@@ -20,6 +20,8 @@
         body, html {
             width: 100%;
             height: 100%;
+            position: fixed;
+            inset: 0;
             overflow: hidden;
             background-color: #080c14;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -27,20 +29,25 @@
             justify-content: center;
             align-items: center;
             color: #ffffff;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
-        /* Responsive Container 710 x 1116 (9:16) */
+        /* ==================================================
+           DYNAMIC RESPONSIVE 9:16 CONTAINER (710 x 1116)
+           ================================================== */
         #game-wrapper {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: calc(100vh * (710 / 1116));
-            max-height: calc(100vw * (1116 / 710));
-            aspect-ratio: 710 / 1116;
+            position: absolute;
+            width: 710px;
+            height: 1116px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
             background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 60%, #080c14 100%);
             overflow: hidden;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-            border-radius: 12px;
+            border-radius: 16px;
+            will-change: transform;
         }
 
         /* ==================================================
@@ -160,7 +167,7 @@
         }
 
         /* ==================================================
-           PUZZLE GRID LAYOUT (35% - 40% - 25%)
+           OPTIMIZED MOBILE PUZZLE GRID (29% - 44% - 27%)
            ================================================== */
         .puzzle-container {
             flex: 1;
@@ -170,15 +177,15 @@
             position: relative;
         }
 
-        /* Central Rope Area Background Highlight */
+        /* Central Rope Arena Background Highlight (44% Width) */
         .rope-arena-bg {
             position: absolute;
             top: 0;
-            left: 35%;
-            width: 40%;
+            left: 29%;
+            width: 44%;
             height: 100%;
             pointer-events: none;
-            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.12) 0%, rgba(15, 23, 42, 0) 80%);
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.14) 0%, rgba(15, 23, 42, 0) 80%);
             border-left: 1px dashed rgba(255, 255, 255, 0.1);
             border-right: 1px dashed rgba(255, 255, 255, 0.1);
             border-radius: 16px;
@@ -195,17 +202,17 @@
             z-index: 25;
         }
 
-        /* Left Column: 35% Width */
+        /* Left Column: 29% Width */
         .left-col {
-            width: 35%;
+            width: 29%;
         }
 
-        /* Right Column: 25% Width */
+        /* Right Column: 27% Width */
         .right-col {
-            width: 25%;
+            width: 27%;
         }
 
-        /* CARDS & SLOTS */
+        /* CARDS & SLOTS (Optimized Mobile Spacing & Padding) */
         .card {
             position: relative;
             background: rgba(15, 23, 42, 0.88);
@@ -224,6 +231,7 @@
         .question-card {
             height: calc((100% - 5 * 8px) / 6);
             border-left: 3.5px solid #38bdf8;
+            padding: 6px 8px;
         }
 
         .question-num {
@@ -236,7 +244,7 @@
         }
 
         .question-text {
-            font-size: 10px;
+            font-size: 12.5px;
             line-height: 1.25;
             color: #f1f5f9;
             word-break: break-word;
@@ -263,16 +271,16 @@
         }
 
         .empty-slot-label {
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 800;
             letter-spacing: 0.5px;
             color: #38bdf8;
         }
 
         .answer-text {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
-            line-height: 1.2;
+            line-height: 1.25;
             color: #0f172a;
             width: 100%;
             word-break: break-word;
@@ -563,14 +571,14 @@
                 </div>
             </div>
 
-            <!-- Puzzle Container -->
+            <!-- Puzzle Container (29% - 44% - 27%) -->
             <div class="puzzle-container">
                 <div class="rope-arena-bg"></div>
 
-                <!-- Left Column: 6 Question Cards (35% Width) -->
+                <!-- Left Column: 6 Question Cards (29% Width) -->
                 <div class="column left-col" id="questions-column"></div>
 
-                <!-- Right Column: 6 Answer Cards + 1 Empty Slot (25% Width) -->
+                <!-- Right Column: 6 Answer Cards + 1 Empty Slot (27% Width) -->
                 <div class="column right-col" id="answers-column"></div>
             </div>
 
@@ -630,16 +638,43 @@
     </div>
 
     <!-- ==================================================
+         DYNAMIC RESPONSIVE 9:16 SCALING ENGINE
+         ================================================== -->
+    <script>
+        function updateGameScale() {
+            const wrapper = document.getElementById('game-wrapper');
+            if (!wrapper) return;
+
+            const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+            const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+            const targetW = 710;
+            const targetH = 1116;
+
+            // Proportional scale factor preserving 9:16 aspect ratio
+            const scale = Math.min(vw / targetW, vh / targetH);
+
+            wrapper.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+
+        window.addEventListener('resize', updateGameScale);
+        window.addEventListener('orientationchange', () => setTimeout(updateGameScale, 100));
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateGameScale);
+            window.visualViewport.addEventListener('scroll', updateGameScale);
+        }
+        document.addEventListener('DOMContentLoaded', updateGameScale);
+    </script>
+
+    <!-- ==================================================
          JAVASCRIPT GAME ENGINE
          ================================================== -->
     <script>
         /**
          * AUDIO MANAGER
-         * Handles HTML5 Audio objects with Web Audio API synthesis fallback
          */
         class AudioManager {
             constructor() {
-                // Audio file objects
                 this.bgm = new Audio('level8_bgm.mp3');
                 this.bgm.loop = true;
                 this.bgm.volume = 0;
@@ -706,7 +741,7 @@
 
             playPull() {
                 const now = performance.now();
-                if (now - this.lastPullTime > 250) { // Throttle 250ms
+                if (now - this.lastPullTime > 250) {
                     this.lastPullTime = now;
                     this.playSingleSfx(this.sfxPull, 'drag');
                 }
@@ -981,7 +1016,7 @@
                 this.slots = [];
                 this.ropes = [];
                 
-                // PERMANENT STATIC RENDER LAYERS (No reordering during dragging)
+                // PERMANENT STATIC RENDER LAYERS
                 this.zOrder = [0, 1, 2, 3, 4, 5];
 
                 // Dragging State & Physics
@@ -999,13 +1034,11 @@
             }
 
             resizeCanvas() {
-                this.effectsCanvas.width = this.wrapper.clientWidth;
-                this.effectsCanvas.height = this.wrapper.clientHeight;
+                this.effectsCanvas.width = 710;
+                this.effectsCanvas.height = 1116;
             }
 
             bindEvents() {
-                window.addEventListener('resize', () => this.resizeCanvas());
-
                 document.getElementById('btn-start').addEventListener('click', () => {
                     this.audio.playTick();
                     this.hideModal(this.introModal);
@@ -1085,7 +1118,6 @@
                 this.movesText.innerText = '0';
                 this.timerText.innerText = '00:00';
 
-                // Play Background Music with 0.8s fade in
                 this.audio.playBGM();
 
                 if (this.timerInterval) clearInterval(this.timerInterval);
@@ -1142,7 +1174,7 @@
 
                 this.renderDOMGrid();
 
-                // 3. Procedural Initial Connections (Ensure NO question starts connected to its correct answer)
+                // 3. Procedural Initial Connections
                 const availableSlotIndices = [];
                 this.slots.forEach((s, idx) => {
                     if (!s.isEmpty) availableSlotIndices.push(idx);
@@ -1162,7 +1194,7 @@
                     }
                 }
 
-                // 4. Generate Procedural Rope Personalities & Control Points (Targeting 8-14 Crossings)
+                // 4. Generate Procedural Rope Curves (Targeting 8-14 Crossings)
                 let bestRopes = [];
                 let maxCrossings = 0;
 
@@ -1174,7 +1206,6 @@
                         const personality = (qIdx + attempt) % 6;
                         const targetSlotIdx = targetSlots[qIdx];
                         
-                        // Control point offset randomization
                         const cp1OffsetX = (Math.random() - 0.5) * 80;
                         const cp1OffsetY = (personality % 2 === 0 ? 1 : -1) * (40 + Math.random() * 60);
                         const cp2OffsetX = (Math.random() - 0.5) * 80;
@@ -1265,27 +1296,25 @@
                 if (el) {
                     const rect = el.getBoundingClientRect();
                     if (rect.width > 0 && rect.height > 0) {
+                        // Dynamically map screen coordinates back into internal 710x1116 resolution
                         return {
-                            x: rect.left + rect.width / 2 - wrapperRect.left,
-                            y: rect.top + rect.height / 2 - wrapperRect.top
+                            x: (rect.left + rect.width / 2 - wrapperRect.left) * (710 / wrapperRect.width),
+                            y: (rect.top + rect.height / 2 - wrapperRect.top) * (1116 / wrapperRect.height)
                         };
                     }
                 }
 
-                const wrapperW = wrapperRect.width || 710;
-                const wrapperH = wrapperRect.height || 1116;
-
                 if (id.startsWith('q-anchor-')) {
                     const idx = parseInt(id.replace('q-anchor-', ''), 10);
                     return {
-                        x: wrapperW * 0.35,
-                        y: wrapperH * 0.16 + idx * (wrapperH * 0.11)
+                        x: 710 * 0.29,
+                        y: 1116 * 0.16 + idx * (1116 * 0.11)
                     };
                 } else if (id.startsWith('a-anchor-')) {
                     const idx = parseInt(id.replace('a-anchor-', ''), 10);
                     return {
-                        x: wrapperW * 0.75,
-                        y: wrapperH * 0.14 + idx * (wrapperH * 0.095)
+                        x: 710 * 0.73,
+                        y: 1116 * 0.14 + idx * (1116 * 0.095)
                     };
                 }
 
@@ -1351,9 +1380,10 @@
                ================================================== */
             getPointerPos(e) {
                 const wrapperRect = this.wrapper.getBoundingClientRect();
+                // Map ClientX/Y through CSS scale back into 710x1116 coordinate system
                 return {
-                    x: e.clientX - wrapperRect.left,
-                    y: e.clientY - wrapperRect.top
+                    x: (e.clientX - wrapperRect.left) * (710 / wrapperRect.width),
+                    y: (e.clientY - wrapperRect.top) * (1116 / wrapperRect.height)
                 };
             }
 
@@ -1367,11 +1397,10 @@
                     const endPos = this.getAnchorPos(`a-anchor-${r.targetSlotIndex}`);
                     const dist = Math.hypot(pos.x - endPos.x, pos.y - endPos.y);
 
-                    if (dist < 45) { // Responsive touch hit radius
+                    if (dist < 45) { // Touch hit radius
                         this.draggingRopeIndex = i;
                         this.dragPos = pos;
                         
-                        // STATIC DEPTH: Do NOT change z-index layer!
                         this.audio.playPull();
                         
                         const slotEl = document.getElementById(`a-slot-${r.targetSlotIndex}`);
@@ -1384,7 +1413,6 @@
             onPointerMove(e) {
                 if (this.draggingRopeIndex !== null) {
                     this.dragPos = this.getPointerPos(e);
-                    // Play dragging sound throttled every 250ms
                     this.audio.playPull();
                 }
             }
@@ -1429,7 +1457,6 @@
 
                     this.moves++;
                     this.movesText.innerText = this.moves;
-                    // Play snap sound ONLY on successful snap
                     this.audio.playSnap();
                 } else {
                     this.ropes[ropeIdx].bounceStartTime = performance.now();
@@ -1548,7 +1575,7 @@
                 const stars = this.calculatedStars || 3;
 
                 try {
-                    // 1. Direct synchronization with index.html's game_level_progression_v1 system
+                    // Direct synchronization with index.html's game_level_progression_v1 system
                     const STORAGE_KEY = 'game_level_progression_v1';
                     let progress;
                     try {
@@ -1596,7 +1623,7 @@
 
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
 
-                    // 2. Auxiliary local keys for fallback compatibility
+                    // Auxiliary local keys for fallback compatibility
                     localStorage.setItem('level_8_completed', 'true');
                     localStorage.setItem('level_8_stars', String(stars));
                     const currentUnlocked = parseInt(localStorage.getItem('unlockedLevel') || '8', 10);
