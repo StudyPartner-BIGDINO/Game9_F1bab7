@@ -1195,6 +1195,225 @@
         .victory-home-btn:active {
             transform: scale(0.95);
         }
+
+        /* --- 🧭 ADVENTURE RECORD POPUP PANEL --- */
+        .adventure-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(11, 13, 16, 0.35); /* ~35% darkness so map is visible behind */
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .adventure-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .adventure-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 420px;
+            max-height: 85vh;
+            max-height: 85dvh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.94) 0%, rgba(11, 19, 36, 0.97) 100%);
+            border: 2px solid #b8860b;
+            border-radius: 12px;
+            padding: 24px 20px;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.25), inset 0 0 15px rgba(255, 215, 0, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            color: #e0e4eb;
+            overflow: hidden;
+        }
+
+        .adventure-modal-overlay.active .adventure-modal-content {
+            transform: scale(1);
+        }
+
+        .adventure-header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .adventure-title {
+            font-family: Georgia, serif;
+            font-size: 1.35rem;
+            color: #ffd700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .adventure-subtitle {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            margin-top: 4px;
+            letter-spacing: 1px;
+        }
+
+        .adventure-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #b8860b rgba(255, 255, 255, 0.05);
+        }
+
+        .adventure-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .adventure-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        .adventure-list::-webkit-scrollbar-thumb {
+            background: #b8860b;
+            border-radius: 3px;
+        }
+
+        .adventure-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .adventure-card[data-completed="true"] {
+            background: rgba(184, 134, 11, 0.12);
+            border-color: rgba(255, 215, 0, 0.35);
+        }
+
+        .adventure-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .adventure-card-name {
+            font-family: Georgia, serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #f3f4f6;
+            letter-spacing: 1px;
+        }
+
+        .adventure-card-stars {
+            font-size: 0.9rem;
+            color: #ffd700;
+            letter-spacing: 2px;
+        }
+
+        .adventure-card-status {
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .adventure-card-status.completed {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        .adventure-card-status.locked {
+            color: #9ca3af;
+            background: rgba(156, 163, 175, 0.1);
+        }
+
+        .adventure-summary {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .adventure-summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .adventure-summary-item:first-child {
+            border-right: 1px solid rgba(255, 215, 0, 0.18);
+        }
+
+        .adventure-summary-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .adventure-summary-value {
+            font-family: Georgia, serif;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+        }
+
+        .adventure-close-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .adventure-close-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            border-color: rgba(255, 215, 0, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -1280,6 +1499,34 @@
             <button class="victory-home-btn" id="btnVictoryHome">
                 🏠 返回主地图
             </button>
+        </div>
+    </div>
+
+    <!-- 🧭 Adventure Record Popup Panel -->
+    <div class="adventure-modal-overlay" id="adventureRecordModal" style="display: none;">
+        <div class="adventure-modal-content">
+            <button class="menu-close-btn" id="btnAdventureXClose" aria-label="Close">&times;</button>
+            <div class="adventure-header">
+                <h2 class="adventure-title">🧭 Adventure Record</h2>
+                <div class="adventure-subtitle">你的历史探险纪录</div>
+            </div>
+            
+            <div class="adventure-list" id="adventureList">
+                <!-- Dynamically populated level record cards -->
+            </div>
+
+            <div class="adventure-summary">
+                <div class="adventure-summary-item">
+                    <span class="adventure-summary-label">Overall Progress</span>
+                    <span class="adventure-summary-value" id="adventureOverallProgress">0 / 9 Levels</span>
+                </div>
+                <div class="adventure-summary-item">
+                    <span class="adventure-summary-label">Total Stars</span>
+                    <span class="adventure-summary-value" id="adventureTotalStars">0 / 27</span>
+                </div>
+            </div>
+
+            <button class="adventure-close-btn" id="btnAdventureClose">关闭</button>
         </div>
     </div>
 
@@ -1407,6 +1654,140 @@
 
         // Exposed globally to allow sub-levels/iframes to trigger unlocks on level completion
         window.GameProgression = GameProgression;
+
+        // --- 🧭 REUSABLE ADVENTURE RECORD MODULE ---
+        const AdventureRecord = {
+            modalEl: null,
+            listEl: null,
+            overallProgressEl: null,
+            totalStarsEl: null,
+            isInitialized: false,
+
+            init() {
+                if (this.isInitialized) return;
+                this.modalEl = document.getElementById('adventureRecordModal');
+                this.listEl = document.getElementById('adventureList');
+                this.overallProgressEl = document.getElementById('adventureOverallProgress');
+                this.totalStarsEl = document.getElementById('adventureTotalStars');
+
+                const btnClose = document.getElementById('btnAdventureClose');
+                const xClose = document.getElementById('btnAdventureXClose');
+
+                if (btnClose) {
+                    btnClose.addEventListener('click', () => {
+                        playClickSound();
+                        this.close();
+                    });
+                }
+                if (xClose) {
+                    xClose.addEventListener('click', () => {
+                        playClickSound();
+                        this.close();
+                    });
+                }
+
+                if (this.modalEl) {
+                    this.modalEl.addEventListener('click', (e) => {
+                        if (e.target === this.modalEl) {
+                            playClickSound();
+                            this.close();
+                        }
+                    });
+                }
+                this.isInitialized = true;
+            },
+
+            render() {
+                if (!this.listEl) this.init();
+                if (!this.listEl) return;
+
+                const progress = GameProgression.getProgress();
+                const totalLevels = 9;
+                let completedCount = 0;
+                let earnedStars = 0;
+                const maxStars = totalLevels * 3; // 27 total stars
+
+                let listHtml = '';
+
+                for (let id = 1; id <= totalLevels; id++) {
+                    const levelData = progress.levels[id] || {};
+                    const isCompleted = !!levelData.completed;
+                    const isUnlocked = id === 1 || !!levelData.unlocked;
+                    
+                    // Stars calculation: default to 3 stars when level completed without explicit stars count
+                    let stars = 0;
+                    if (isCompleted) {
+                        stars = levelData.stars !== undefined ? levelData.stars : 3;
+                    } else if (levelData.stars !== undefined) {
+                        stars = levelData.stars;
+                    }
+
+                    if (stars > 3) stars = 3;
+                    if (stars < 0) stars = 0;
+
+                    if (isCompleted) {
+                        completedCount++;
+                    }
+                    earnedStars += stars;
+
+                    // Render star sequence
+                    let starDisplay = '';
+                    if (isCompleted || isUnlocked) {
+                        for (let s = 1; s <= 3; s++) {
+                            starDisplay += s <= stars ? '⭐' : '☆';
+                        }
+                    } else {
+                        starDisplay = '☆☆☆';
+                    }
+
+                    const statusClass = isCompleted ? 'completed' : 'locked';
+                    const statusText = isCompleted ? '✅ 已完成' : '🔒 未完成';
+
+                    listHtml += `
+                        <div class="adventure-card" data-completed="${isCompleted}">
+                            <div class="adventure-card-info">
+                                <span class="adventure-card-name">LEVEL ${id}</span>
+                                <span class="adventure-card-stars">${starDisplay}</span>
+                            </div>
+                            <div class="adventure-card-status ${statusClass}">
+                                ${statusText}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                this.listEl.innerHTML = listHtml;
+
+                if (this.overallProgressEl) {
+                    this.overallProgressEl.textContent = `${completedCount} / ${totalLevels} Levels`;
+                }
+                if (this.totalStarsEl) {
+                    this.totalStarsEl.textContent = `${earnedStars} / ${maxStars}`;
+                }
+            },
+
+            open() {
+                this.init();
+                this.render();
+                if (this.modalEl) {
+                    this.modalEl.style.display = 'flex';
+                    this.modalEl.offsetHeight; // Force reflow for scale + fade animation
+                    this.modalEl.classList.add('active');
+                }
+            },
+
+            close() {
+                if (this.modalEl) {
+                    this.modalEl.classList.remove('active');
+                    setTimeout(() => {
+                        this.modalEl.style.display = 'none';
+                    }, 250); // Matches close animation duration (250ms)
+                }
+            }
+        };
+
+        // Exposed globally for future extensions
+        window.AdventureRecord = AdventureRecord;
 
         // Clean configuration array for independent PNG badges
         const BADGES = [
@@ -1837,7 +2218,8 @@
         viewport.addEventListener('pointerdown', (e) => {
             // Ignore viewport pan when interacting with open modals
             const victoryModal = document.getElementById('victoryModal');
-            if (menuModal.classList.contains('active') || confirmResetModal.classList.contains('active') || (victoryModal && victoryModal.classList.contains('active'))) {
+            const adventureModal = document.getElementById('adventureRecordModal');
+            if (menuModal.classList.contains('active') || confirmResetModal.classList.contains('active') || (victoryModal && victoryModal.classList.contains('active')) || (adventureModal && adventureModal.classList.contains('active'))) {
                 return;
             }
 
@@ -1979,7 +2361,7 @@
                             if (buttonId === 'btn-menu') {
                                 openMenuModal();
                             } else if (buttonId === 'btn-achievement') {
-                                alert("Achievements Pressed");
+                                AdventureRecord.open();
                             }
                         }, 100);
                     }
@@ -2025,7 +2407,7 @@
         // Mobile/Tablet Double Tap toggle: zoom relative to device profile
         let lastTapTime = 0;
         viewport.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.ui-button') || e.target.closest('.menu-modal-content') || e.target.closest('.victory-banner-container')) return;
+            if (e.target.closest('.ui-button') || e.target.closest('.menu-modal-content') || e.target.closest('.victory-banner-container') || e.target.closest('.adventure-modal-content')) return;
             const currentTime = new Date().getTime();
             const tapDelay = currentTime - lastTapTime;
             if (tapDelay < 300 && tapDelay > 0) {
