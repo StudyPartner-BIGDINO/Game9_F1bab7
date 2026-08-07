@@ -1334,6 +1334,7 @@
 
         function returnToMainMap() {
             audio.playClick();
+            localStorage.setItem('level9JustCompleted','true');
             GameProgression.completeLevel(9, { stars: hearts });
             audio.fadeOutBGM(500);
 

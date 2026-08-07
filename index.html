@@ -1150,6 +1150,8 @@
                 this.save(init);
                 localStorage.removeItem("introLastPlayedAt"); // Resets the 1-hour intro cooldown
                 localStorage.removeItem("introPlayed");      // Clean up legacy key if existing
+                localStorage.removeItem("level9JustCompleted");
+                localStorage.removeItem("level9Celebrated");
                 sessionStorage.removeItem("introPlayed");
                 return init;
             }
@@ -2002,6 +2004,235 @@
             updateBadgeStates();
         }
 
+        // --- FINAL LEVEL CELEBRATION (LEVEL 9 COMPLETION FIREWORKS) ---
+        function checkAndStartFinalCelebration() {
+            const justCompleted = localStorage.getItem('level9JustCompleted') === 'true';
+            const isCompleted = GameProgression.isCompleted(9);
+            const celebrated = localStorage.getItem('level9Celebrated') === 'true';
+
+            // Trigger celebration only once immediately after Level 9 completion
+            if ((justCompleted || isCompleted) && !celebrated) {
+                localStorage.setItem('level9Celebrated', 'true');
+                localStorage.removeItem('level9JustCompleted');
+
+                setTimeout(() => {
+                    startFinalCelebration();
+                }, 300);
+            }
+        }
+
+        function startFinalCelebration() {
+            const canvas = document.createElement('canvas');
+            canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;pointer-events:none;z-index:99999;';
+            document.body.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            const handleResize = () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', handleResize);
+
+            // Premium AAA Gold & Amber Palette (Strictly avoiding rainbow colors)
+            const GOLD_PALETTE = [
+                '#ffffff', // Sparkle white core
+                '#fff3a0', // Warm shimmering white
+                '#ffd700', // Metallic Gold
+                '#ffae00', // Deep Gold
+                '#ff8c00', // Amber Orange
+                '#e6a100'  // Dark Warm Gold
+            ];
+
+            let animationFrameId = null;
+            let startTime = performance.now();
+            let rockets = [];
+            let particles = [];
+            let sparkles = [];
+
+            // Scheduled launch sequence spanning ~3.2s with grand finale
+            const schedule = [
+                { time: 0, pos: 'left' },
+                { time: 100, pos: 'right' },
+                { time: 400, pos: 'center' },
+                { time: 800, pos: 'left' },
+                { time: 1100, pos: 'right' },
+                { time: 1500, pos: 'center' },
+                { time: 1900, pos: 'left' },
+                { time: 2100, pos: 'right' },
+                { time: 2600, pos: 'center' },
+                { time: 3000, pos: 'left' },
+                { time: 3100, pos: 'center' },
+                { time: 3200, pos: 'right' }
+            ];
+
+            let launchIndex = 0;
+
+            function launchRocket(pos) {
+                let startX;
+                if (pos === 'left') {
+                    startX = width * 0.25 + (Math.random() - 0.5) * (width * 0.08);
+                } else if (pos === 'right') {
+                    startX = width * 0.75 + (Math.random() - 0.5) * (width * 0.08);
+                } else {
+                    startX = width * 0.50 + (Math.random() - 0.5) * (width * 0.08);
+                }
+
+                const targetY = height * (0.12 + Math.random() * 0.22);
+                const startY = height * 0.95;
+                const speed = 12 + Math.random() * 3;
+
+                rockets.push({
+                    x: startX,
+                    y: startY,
+                    targetY: targetY,
+                    vy: -speed,
+                    color: GOLD_PALETTE[Math.floor(Math.random() * GOLD_PALETTE.length)]
+                });
+            }
+
+            function explode(x, y) {
+                const count = 55 + Math.floor(Math.random() * 20);
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 6.5 + 1.5;
+                    const color = GOLD_PALETTE[Math.floor(Math.random() * GOLD_PALETTE.length)];
+                    particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 2.2 + Math.random() * 2.0,
+                        color: color,
+                        life: 1.0,
+                        decay: 0.014 + Math.random() * 0.012
+                    });
+                }
+            }
+
+            function loop(now) {
+                const elapsed = now - startTime;
+
+                // Process scheduled launches
+                while (launchIndex < schedule.length && elapsed >= schedule[launchIndex].time) {
+                    launchRocket(schedule[launchIndex].pos);
+                    launchIndex++;
+                }
+
+                ctx.clearRect(0, 0, width, height);
+
+                // Update & Render Rockets
+                for (let i = rockets.length - 1; i >= 0; i--) {
+                    const r = rockets[i];
+                    r.y += r.vy;
+
+                    // Rocket trail
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+                    ctx.beginPath();
+                    ctx.arc(r.x + (Math.random() - 0.5) * 2, r.y + 6, 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = r.color;
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (r.y <= r.targetY || r.vy >= 0) {
+                        explode(r.x, r.y);
+                        rockets.splice(i, 1);
+                    }
+                }
+
+                // Update & Render Main Explosion Particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.95;
+                    p.vy *= 0.95;
+                    p.vy += 0.08; // Gravity
+                    p.life -= p.decay;
+
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    // Spawn trailing micro sparkles
+                    if (Math.random() < 0.25) {
+                        sparkles.push({
+                            x: p.x + (Math.random() - 0.5) * 4,
+                            y: p.y + (Math.random() - 0.5) * 4,
+                            vx: (Math.random() - 0.5) * 0.8,
+                            vy: (Math.random() - 0.5) * 0.8 + 0.2,
+                            radius: 1.0 + Math.random() * 1.2,
+                            color: Math.random() < 0.5 ? '#ffffff' : '#ffd700',
+                            life: 0.8,
+                            decay: 0.03 + Math.random() * 0.03
+                        });
+                    }
+
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, p.life);
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Update & Render Sparkling Particles
+                for (let i = sparkles.length - 1; i >= 0; i--) {
+                    const s = sparkles[i];
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    s.vy += 0.03;
+                    s.life -= s.decay;
+
+                    if (s.life <= 0) {
+                        sparkles.splice(i, 1);
+                        continue;
+                    }
+
+                    const alpha = Math.max(0, s.life * (Math.random() < 0.4 ? 0.3 : 1.0));
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = s.color;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Clean termination check
+                if (launchIndex >= schedule.length && rockets.length === 0 && particles.length === 0 && sparkles.length === 0) {
+                    cleanup();
+                } else if (elapsed > 6000) { // Safety cutoff
+                    cleanup();
+                } else {
+                    animationFrameId = requestAnimationFrame(loop);
+                }
+            }
+
+            function cleanup() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                window.removeEventListener('resize', handleResize);
+                if (canvas && canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
+                rockets = [];
+                particles = [];
+                sparkles = [];
+            }
+
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
         // --- ASSETS PRELOADER ENGINE ---
         function preloadAssets(assets, onProgress) {
             let loadedCount = 0;
@@ -2056,6 +2287,9 @@
 
                 // Ensure BGM plays reliably for returning sessions
                 ensureBGMPlaying();
+
+                // Trigger celebration check once map is visible
+                checkAndStartFinalCelebration();
             } else {
                 // Cooldown expired or first-time visit:
                 // Clean up legacy boolean key if present
@@ -2093,6 +2327,7 @@
                     setTimeout(() => {
                         cloudIntroScreen.remove();
                         gameViewport.classList.add('interactive'); // Grants pointer zoom/drag interaction
+                        checkAndStartFinalCelebration();
                     }, 1800);
                 });
             }
@@ -2107,6 +2342,7 @@
             updateBadgeStates();
             if (!shouldShowCloudIntro()) {
                 ensureBGMPlaying();
+                checkAndStartFinalCelebration();
             }
         });
 
@@ -2115,6 +2351,7 @@
                 updateBadgeStates();
                 if (!shouldShowCloudIntro()) {
                     ensureBGMPlaying();
+                    checkAndStartFinalCelebration();
                 }
             }
         });
@@ -2160,6 +2397,23 @@
                     .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
-    </script>
+    
+// Level 9 celebration trigger
+window.addEventListener('load', () => {
+  if (localStorage.getItem('level9JustCompleted') === 'true') {
+    localStorage.removeItem('level9JustCompleted');
+    setTimeout(() => {
+      if (typeof launchFireworks === 'function') {
+        launchFireworks();
+      } else if (typeof startFireworks === 'function') {
+        startFireworks();
+      } else {
+        console.log('Level 9 completed! Add your fireworks function here.');
+      }
+    },1000);
+  }
+});
+
+</script>
 </body>
 </html>
