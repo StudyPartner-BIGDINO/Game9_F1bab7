@@ -713,6 +713,126 @@
             pointer-events: none;
         }
 
+        /* --- BADGE 9 PERMANENT CHAMPION EFFECTS --- */
+        .mission-badge[data-champion="true"] {
+            animation: championBadgePulse 6s ease-in-out infinite !important;
+            z-index: 5;
+        }
+
+        /* Gentle pulse once every 6 seconds (100% -> 104% -> 100%) */
+        @keyframes championBadgePulse {
+            0%, 88%, 100% {
+                transform: translate3d(-50%, -50%, 0) scale(1);
+            }
+            94% {
+                transform: translate3d(-50%, -50%, 0) scale(1.04);
+            }
+        }
+
+        /* Soft Golden Aura Breathing Glow */
+        .champion-glow-layer {
+            position: absolute;
+            top: -16%;
+            left: -16%;
+            width: 132%;
+            height: 132%;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            z-index: 1;
+            animation: championGlowBreathe 3.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes championGlowBreathe {
+            0% {
+                opacity: 0.65;
+                box-shadow: 0 0 16px rgba(255, 215, 0, 0.55), 0 0 30px rgba(255, 180, 0, 0.35), inset 0 0 12px rgba(255, 215, 0, 0.35);
+            }
+            100% {
+                opacity: 0.95;
+                box-shadow: 0 0 32px rgba(255, 215, 0, 0.95), 0 0 50px rgba(255, 165, 0, 0.65), inset 0 0 22px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        /* Gold Medal Light Sweep / Shimmer Layer (~800ms sweep every 10 seconds) */
+        .champion-shimmer-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 4;
+        }
+
+        .champion-shimmer-layer::after {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: linear-gradient(
+                120deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 30%,
+                rgba(255, 245, 160, 0.9) 50%,
+                rgba(255, 255, 255, 0.3) 70%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: translateX(-150%) rotate(25deg);
+            mix-blend-mode: color-dodge;
+            animation: championShimmerSweep 10s ease-in-out infinite;
+        }
+
+        @keyframes championShimmerSweep {
+            0%, 88% {
+                transform: translateX(-150%) rotate(25deg);
+                opacity: 0;
+            }
+            89% {
+                opacity: 1;
+            }
+            96% {
+                transform: translateX(150%) rotate(25deg);
+                opacity: 1;
+            }
+            97%, 100% {
+                transform: translateX(150%) rotate(25deg);
+                opacity: 0;
+            }
+        }
+
+        /* Floating Sparkle Particles */
+        .champion-sparkle {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: radial-gradient(circle, #ffffff 20%, #ffd700 70%, transparent 100%);
+            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+            pointer-events: none;
+            z-index: 5;
+            filter: drop-shadow(0 0 5px #ffd700);
+            animation: championSparkleAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes championSparkleAnim {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(0) scale(0.2);
+            }
+            30% {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(-6px) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(-20px) scale(0.2);
+            }
+        }
+
         /* Hover Behavior (Desktop Only - Scoped to avoid Locked badges) */
         @media (hover: hover) {
             .mission-badge[data-state="available"]:hover,
@@ -962,6 +1082,119 @@
             background: linear-gradient(135deg, #a67913 0%, #ffd700 50%, #a67913 100%);
             box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
         }
+
+        /* --- FINAL VICTORY CELEBRATION BANNER --- */
+        .victory-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(0, 0, 0, 0.45); /* Soft dark overlay reveals fireworks & map underneath */
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 100000; /* Positioned cleanly above fireworks canvas (z-index 99999) */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        .victory-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* Banner Container (Portrait Mobile Center Frame) */
+        .victory-banner-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 85%; /* 80%~90% screen width on mobile */
+            max-width: 440px;
+            opacity: 0;
+            transform: scale(0.9);
+            will-change: transform, opacity;
+        }
+
+        /* 700ms Scale 90% -> 105% -> 100% Animation Sequence */
+        .victory-modal-overlay.active .victory-banner-container {
+            animation: victoryBannerEnter 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes victoryBannerEnter {
+            0% {
+                transform: scale(0.90);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.00);
+                opacity: 1;
+            }
+        }
+
+        /* Existing PNG Victory Banner Image */
+        .victory-banner-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.35));
+        }
+
+        /* Primary "返回主地图" Button Positioned Below Image with 24px Spacing */
+        .victory-home-btn {
+            margin-top: 24px; /* 20~30px spacing below image */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #8a640f 0%, #b8860b 25%, #ffd700 50%, #b8860b 75%, #8a640f 100%);
+            background-size: 200% 100%;
+            border: 2px solid #ffd700;
+            border-radius: 4px;
+            color: #0b0d10;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.6);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+            opacity: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            clip-path: polygon(
+                0% 3px, 3px 0%, calc(100% - 3px) 0%, 100% 3px,
+                100% calc(100% - 3px), calc(100% - 3px) 100%, 3px 100%, 0% calc(100% - 3px)
+            );
+        }
+
+        /* Reveal button smoothly right after the banner scale animation finishes */
+        .victory-modal-overlay.active .victory-home-btn {
+            animation: buttonFadeIn 0.4s ease 0.7s forwards;
+        }
+
+        @keyframes buttonFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .victory-home-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -1040,6 +1273,16 @@
         </div>
     </div>
 
+    <!-- Final Victory Celebration Banner Overlay using victory_banner.png -->
+    <div class="victory-modal-overlay" id="victoryModal" style="display: none;">
+        <div class="victory-banner-container" id="victoryBanner">
+            <img class="victory-banner-img" src="victory_banner.png" alt="Victory Banner">
+            <button class="victory-home-btn" id="btnVictoryHome">
+                🏠 返回主地图
+            </button>
+        </div>
+    </div>
+
     <script>
         // --- HELPER FOR 1-HOUR CLOUD INTRO COOLDOWN SYSTEM ---
         function shouldShowCloudIntro() {
@@ -1105,7 +1348,6 @@
             },
 
             // Modular trigger to complete a level. Automatically unlocks the subsequent level.
-            // Accepts secondary payload for scores, stars, and future expansion elements.
             completeLevel(levelId, data = {}) {
                 const id = parseInt(levelId);
                 const progress = this.getProgress();
@@ -1141,6 +1383,12 @@
                 progress.stats.levelsCompleted = completedCount;
 
                 this.save(progress);
+
+                // Set Level 9 completion trigger flag
+                if (id === 9) {
+                    localStorage.setItem('level9JustCompleted', 'true');
+                }
+
                 return progress;
             },
 
@@ -1185,6 +1433,7 @@
             'badge7.png',
             'badge8.png',
             'badge9.png',
+            'victory_banner.png',
             'https://pngimg.com/uploads/cloud/cloud_PNG2.png',
             'https://pngimg.com/uploads/cloud/cloud_PNG18.png',
             'https://pngimg.com/uploads/cloud/cloud_PNG3.png',
@@ -1587,7 +1836,8 @@
         // --- POINTER EVENTS SYSTEM ---
         viewport.addEventListener('pointerdown', (e) => {
             // Ignore viewport pan when interacting with open modals
-            if (menuModal.classList.contains('active') || confirmResetModal.classList.contains('active')) {
+            const victoryModal = document.getElementById('victoryModal');
+            if (menuModal.classList.contains('active') || confirmResetModal.classList.contains('active') || (victoryModal && victoryModal.classList.contains('active'))) {
                 return;
             }
 
@@ -1775,7 +2025,7 @@
         // Mobile/Tablet Double Tap toggle: zoom relative to device profile
         let lastTapTime = 0;
         viewport.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.ui-button') || e.target.closest('.menu-modal-content')) return;
+            if (e.target.closest('.ui-button') || e.target.closest('.menu-modal-content') || e.target.closest('.victory-banner-container')) return;
             const currentTime = new Date().getTime();
             const tapDelay = currentTime - lastTapTime;
             if (tapDelay < 300 && tapDelay > 0) {
@@ -1826,6 +2076,52 @@
 
         // Run animation loop
         requestAnimationFrame(renderLoop);
+
+        // --- CHAMPION BADGE SPARKLE PARTICLE EMITTER ---
+        let championSparkleTimer = null;
+
+        function startChampionSparkleEmitter(badgeEl) {
+            if (championSparkleTimer) return;
+
+            function emitSparkles() {
+                if (!document.body.contains(badgeEl) || badgeEl.getAttribute('data-champion') !== 'true') {
+                    championSparkleTimer = null;
+                    return;
+                }
+
+                // Randomly generate 2~4 small golden sparkles
+                const count = Math.floor(Math.random() * 3) + 2; 
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        if (!document.body.contains(badgeEl)) return;
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'champion-sparkle';
+                        
+                        // Random position around Badge 9 (-15% to 115%)
+                        const left = (Math.random() * 130 - 15).toFixed(1) + '%';
+                        const top = (Math.random() * 130 - 15).toFixed(1) + '%';
+                        sparkle.style.left = left;
+                        sparkle.style.top = top;
+                        
+                        // Random duration 1.2s - 1.8s
+                        const dur = (1.2 + Math.random() * 0.6).toFixed(2) + 's';
+                        sparkle.style.animationDuration = dur;
+
+                        badgeEl.appendChild(sparkle);
+
+                        sparkle.addEventListener('animationend', () => {
+                            sparkle.remove();
+                        });
+                    }, i * 180);
+                }
+
+                // Random interval between 5000ms and 8000ms (5~8 seconds)
+                const nextInterval = Math.floor(Math.random() * 3000) + 5000;
+                championSparkleTimer = setTimeout(emitSparkles, nextInterval);
+            }
+
+            championSparkleTimer = setTimeout(emitSparkles, 1200);
+        }
 
         // --- ARCHITECTURAL BADGE RENDERING SYSTEM ---
 
@@ -1937,8 +2233,40 @@
                         clickBurst.className = 'click-burst-layer';
                         el.appendChild(clickBurst);
                     }
+
+                    // --- BADGE 9 SPECIAL CHAMPION EFFECTS ---
+                    if (badgeId === '9') {
+                        el.setAttribute('data-champion', 'true');
+
+                        // Champion Layer A: Soft Golden Aura Breathing Glow
+                        let champGlow = el.querySelector('.champion-glow-layer');
+                        if (!champGlow) {
+                            champGlow = document.createElement('div');
+                            champGlow.className = 'champion-glow-layer';
+                            el.appendChild(champGlow);
+                        }
+
+                        // Champion Layer B: Gold Medal Light Sweep / Shimmer Layer
+                        let champShimmer = el.querySelector('.champion-shimmer-layer');
+                        if (!champShimmer) {
+                            champShimmer = document.createElement('div');
+                            champShimmer.className = 'champion-shimmer-layer';
+                            el.appendChild(champShimmer);
+                        }
+
+                        // Start Sparkle particle emitter loop
+                        startChampionSparkleEmitter(el);
+                    }
                 } else {
                     // Symmetrical cleanup: avoid memory leaks / leftover styling properties on reset
+                    if (badgeId === '9') {
+                        el.removeAttribute('data-champion');
+                        const champGlow = el.querySelector('.champion-glow-layer');
+                        if (champGlow) champGlow.remove();
+                        const champShimmer = el.querySelector('.champion-shimmer-layer');
+                        if (champShimmer) champShimmer.remove();
+                    }
+
                     const innerGlow = el.querySelector('.inner-glow-layer');
                     if (innerGlow) innerGlow.remove();
 
@@ -2004,24 +2332,52 @@
             updateBadgeStates();
         }
 
-        // --- FINAL LEVEL CELEBRATION (LEVEL 9 COMPLETION FIREWORKS) ---
+        // --- FINAL LEVEL CELEBRATION (LEVEL 9 COMPLETION FIREWORKS & BANNER) ---
         function checkAndStartFinalCelebration() {
             const justCompleted = localStorage.getItem('level9JustCompleted') === 'true';
             const isCompleted = GameProgression.isCompleted(9);
             const celebrated = localStorage.getItem('level9Celebrated') === 'true';
 
-            // Trigger celebration only once immediately after Level 9 completion
-            if ((justCompleted || isCompleted) && !celebrated) {
-                localStorage.setItem('level9Celebrated', 'true');
+            // Immediately consume level9JustCompleted upon detection to prevent repetition
+            if (justCompleted) {
                 localStorage.removeItem('level9JustCompleted');
+                localStorage.setItem('level9Celebrated', 'true');
 
                 setTimeout(() => {
                     startFinalCelebration();
-                }, 300);
+                }, 400);
+            } else if (isCompleted && !celebrated) {
+                localStorage.setItem('level9Celebrated', 'true');
+                setTimeout(() => {
+                    startFinalCelebration();
+                }, 400);
             }
         }
 
         function startFinalCelebration() {
+            // Activate Victory Banner Overlay using victory_banner.png
+            const victoryModal = document.getElementById('victoryModal');
+            const btnVictoryHome = document.getElementById('btnVictoryHome');
+
+            if (victoryModal) {
+                victoryModal.style.display = 'flex';
+                victoryModal.offsetHeight; // Force reflow for smooth animation
+                victoryModal.classList.add('active');
+            }
+
+            if (btnVictoryHome) {
+                btnVictoryHome.onclick = () => {
+                    playClickSound();
+                    if (victoryModal) {
+                        victoryModal.classList.remove('active');
+                        setTimeout(() => {
+                            victoryModal.style.display = 'none';
+                        }, 400);
+                    }
+                };
+            }
+
+            // Fireworks Canvas Overlay (z-index 99999, victoryModal sits at z-index 100000)
             const canvas = document.createElement('canvas');
             canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;pointer-events:none;z-index:99999;';
             document.body.appendChild(canvas);
@@ -2036,7 +2392,7 @@
             };
             window.addEventListener('resize', handleResize);
 
-            // Premium AAA Gold & Amber Palette (Strictly avoiding rainbow colors)
+            // Premium AAA Gold & Amber Palette
             const GOLD_PALETTE = [
                 '#ffffff', // Sparkle white core
                 '#fff3a0', // Warm shimmering white
@@ -2397,23 +2753,6 @@
                     .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
-    
-// Level 9 celebration trigger
-window.addEventListener('load', () => {
-  if (localStorage.getItem('level9JustCompleted') === 'true') {
-    localStorage.removeItem('level9JustCompleted');
-    setTimeout(() => {
-      if (typeof launchFireworks === 'function') {
-        launchFireworks();
-      } else if (typeof startFireworks === 'function') {
-        startFireworks();
-      } else {
-        console.log('Level 9 completed! Add your fireworks function here.');
-      }
-    },1000);
-  }
-});
-
-</script>
+    </script>
 </body>
 </html>
