@@ -297,48 +297,57 @@
             gap: 5px 8px;
         }
 
-        /* Restored Answer Option Color Coding */
+        /* Full-Color Button Answer Options */
         .option-item {
             font-size: clamp(0.72rem, 2.4vw, 0.78rem);
-            line-height: 1.2;
-            color: #d1c2b0;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 5px 6px;
-            border-radius: 4px;
-            border-left: 3px solid var(--board-border);
+            line-height: 1.25;
+            color: #ffffff;
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
             white-space: normal;
             word-break: break-word;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.7);
         }
 
         .option-item.opt-A {
-            border-left-color: var(--tile-red-2);
+            background: var(--tile-red-2);
+            border-color: var(--tile-red-1);
         }
         .option-item.opt-A span {
-            color: var(--tile-red-1);
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 3px;
         }
 
         .option-item.opt-B {
-            border-left-color: var(--tile-blue-2);
+            background: var(--tile-blue-2);
+            border-color: var(--tile-blue-1);
         }
         .option-item.opt-B span {
-            color: var(--tile-blue-1);
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 3px;
         }
 
         .option-item.opt-C {
-            border-left-color: var(--tile-teal-2);
+            background: var(--tile-teal-2);
+            border-color: var(--tile-teal-1);
         }
         .option-item.opt-C span {
-            color: var(--tile-teal-1);
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 3px;
         }
 
         .option-item.opt-D {
-            border-left-color: var(--tile-purple-2);
+            background: var(--tile-purple-2);
+            border-color: var(--tile-purple-1);
         }
         .option-item.opt-D span {
-            color: var(--tile-purple-1);
-        }
-
-        .option-item span {
+            color: #ffffff;
             font-weight: bold;
             margin-right: 3px;
         }
@@ -548,7 +557,7 @@
             font-size: 0.8rem;
             line-height: 1.35;
             color: #d1c2b0;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             display: flex;
             flex-direction: column;
             gap: 7px;
@@ -579,7 +588,7 @@
             margin-top: 1px;
         }
 
-        /* Step 2: Swatch Legend Row */
+        /* Step 2: Clear Color Swatch Legend Row */
         .color-legend-row {
             display: flex;
             justify-content: space-between;
@@ -593,13 +602,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3px 0;
+            padding: 5px 0;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             font-family: Georgia, serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
         }
 
         .legend-red { background: var(--tile-red-2); border: 1px solid var(--tile-red-1); }
@@ -633,9 +643,9 @@
             font-family: Georgia, serif;
         }
 
-        .m-red-1 { background: var(--tile-red-1); }
-        .m-red-2 { background: var(--tile-red-2); }
-        .m-red-3 { background: var(--tile-red-3); border: 1px solid var(--text-gold); color: var(--text-gold); }
+        .m-blue-1 { background: var(--tile-blue-1); }
+        .m-blue-2 { background: var(--tile-blue-2); }
+        .m-blue-3 { background: var(--tile-blue-3); border: 1px solid var(--text-gold); color: var(--text-gold); }
 
         .m-plus, .m-arrow {
             font-size: 0.75rem;
@@ -647,6 +657,21 @@
             font-size: 0.68rem;
             color: var(--text-muted);
             margin-top: 4px;
+        }
+
+        /* Action-Oriented Tutorial Summary Banner */
+        .tutorial-summary-banner {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(140, 93, 53, 0.25) 100%);
+            border: 1px solid var(--text-gold);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin: 6px 0 14px 0;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--text-gold);
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         .plaque-btn {
@@ -715,7 +740,7 @@
             </div>
         </div>
 
-        <!-- Question Card (Educational Malay Content Unchanged) -->
+        <!-- Question Card -->
         <div class="question-card">
             <div class="question-text" id="questionText">加载题目中...</div>
             <div class="options-grid" id="optionsGrid">
@@ -742,7 +767,7 @@
         <!-- Status / Guidance -->
         <div class="status-area" id="statusArea">
             <div>合并相同颜色，获得 A / B / C / D</div>
-            <div style="font-size: 0.7rem; color: var(--text-gold); margin-top: 1px;">双击你认为正确的答案即可提交</div>
+            <div style="font-size: 0.72rem; color: var(--text-gold); margin-top: 2px;">生成答案方块后，双击正确的答案方块即可提交</div>
         </div>
     </div>
 
@@ -753,13 +778,13 @@
             <div class="tutorial-body">
                 <div class="tutorial-step">
                     <span class="step-num">1</span>
-                    <span>先阅读题目，想一想正确答案。</span>
+                    <span>看题目，找出正确答案。</span>
                 </div>
                 
                 <div class="tutorial-step">
                     <span class="step-num">2</span>
                     <div style="flex: 1;">
-                        <div>每个答案都有自己的颜色：</div>
+                        <div>记住答案的颜色：</div>
                         <div class="color-legend-row">
                             <div class="legend-item legend-red">A</div>
                             <div class="legend-item legend-blue">B</div>
@@ -772,25 +797,32 @@
                 <div class="tutorial-step">
                     <span class="step-num">3</span>
                     <div style="flex: 1;">
-                        <div>滑动棋盘，合并相同颜色。</div>
+                        <div>找到答案的颜色，滑动棋盘把它们合起来：</div>
                         <div class="tutorial-merge-example">
-                            <div class="mini-tile m-red-1"></div>
+                            <div class="mini-tile m-blue-1"></div>
                             <span class="m-plus">+</span>
-                            <div class="mini-tile m-red-1"></div>
+                            <div class="mini-tile m-blue-1"></div>
                             <span class="m-arrow">→</span>
-                            <div class="mini-tile m-red-2"></div>
+                            <div class="mini-tile m-blue-2"></div>
                             <span class="m-arrow">→</span>
-                            <div class="mini-tile m-red-3">A</div>
+                            <div class="mini-tile m-blue-3">B</div>
                         </div>
-                        <div class="tutorial-subtext">（连续合成两次即可获得答案，其他颜色同理）</div>
+                        <div class="tutorial-subtext">连续合成 2 次，就能得到答案。</div>
                     </div>
                 </div>
 
                 <div class="tutorial-step">
                     <span class="step-num">4</span>
-                    <span>合出答案后，<strong>双击</strong>你认为正确的答案方块即可提交。</span>
+                    <div style="flex: 1;">
+                        <div>合出答案后，<strong>双击</strong>答案方块提交。</div>
+                    </div>
                 </div>
             </div>
+
+            <div class="tutorial-summary-banner">
+                记住：答案是什么，就合什么颜色！
+            </div>
+
             <button class="plaque-btn" id="btnStartGame">开始挑战</button>
         </div>
     </div>
@@ -923,7 +955,7 @@
         document.addEventListener('keydown', unlockAudio, { once: true });
 
 
-        // --- 1. QUESTIONS DATA STRUCTURE (Unchanged Malay Sejarah Content) ---
+        // --- 1. QUESTIONS DATA STRUCTURE ---
         const QUESTIONS = [
             {
                 question: "Apabila berakhirnya Tamadun Indus, berlaku perubahan dalam perkembangan Tamadun India. Pusat perkembangan Tamadun India beralih ke",
@@ -1147,7 +1179,7 @@
             });
         }
 
-        // --- 6. 2048 MOVEMENT & MERGE ENGINE (CREATES FINAL TILES WITHOUT AUTO EVALUATE) ---
+        // --- 6. 2048 MOVEMENT & MERGE ENGINE ---
         function move(direction) {
             if (gameState !== 'playing') return;
 
@@ -1321,7 +1353,7 @@
             statusArea.className = 'status-area';
             statusArea.innerHTML = `
                 <div>合并相同颜色，获得 A / B / C / D</div>
-                <div style="font-size: 0.7rem; color: var(--text-gold); margin-top: 1px;">双击你认为正确的答案即可提交</div>
+                <div style="font-size: 0.72rem; color: var(--text-gold); margin-top: 2px;">生成答案方块后，双击正确的答案方块即可提交</div>
             `;
         }
 
