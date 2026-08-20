@@ -299,7 +299,7 @@
             display: flex;
             flex-direction: column;
             max-height: 88vh;
-            overflow: hidden !important; /* CRITICAL: Entire popup DOES NOT scroll */
+            overflow: hidden !important;
         }
 
         @keyframes modalPop {
@@ -415,7 +415,7 @@
             transform: scale(1.25);
         }
 
-        /* QUESTION POPUP: Popup size and button size UNCHANGED, ONLY Question Text Area is Scrollable */
+        /* QUESTION POPUP */
         #question-modal .modal-card {
             border-color: #4cc9f0;
             text-align: left;
@@ -431,12 +431,11 @@
             flex-shrink: 0;
         }
 
-        /* ONLY the question text box is scrollable on desktop and mobile */
         .question-text-scroll {
             max-height: 170px;
-            overflow-y: auto !important; /* Visible scrollbar ONLY when overflowing */
+            overflow-y: auto !important;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-y !important; /* Smooth touch swipe scrolling on mobile */
+            touch-action: pan-y !important;
             overscroll-behavior: contain;
             margin-bottom: 16px;
             background: rgba(0, 0, 0, 0.45);
@@ -464,7 +463,6 @@
             border-radius: 3px;
         }
 
-        /* Answer buttons ALWAYS remain fixed & visible at bottom */
         .options-grid {
             display: flex;
             flex-direction: column;
@@ -912,7 +910,7 @@
                 const hb = AUDIOS['heartbeat'];
                 if (hb) {
                     hb.loop = true;
-                    hb.volume = 0.25; // 20-30% volume
+                    hb.volume = 0.25;
                     hb.play().catch(() => {});
                     this.heartbeatPlaying = true;
                 }
@@ -1381,7 +1379,7 @@
                 this.shakeTime = 0;
 
                 this.aiTimer = 0;
-                this.nextStompDelay = 2.4;
+                this.nextStompDelay = 2.8;
 
                 this.setupInputs();
                 this.setupUI();
@@ -1477,7 +1475,6 @@
                 const wrapper = document.getElementById('game-wrapper');
 
                 wrapper.addEventListener('touchstart', (e) => {
-                    // Allow native scrolling inside question text box without swallowing touch
                     if (e.target.closest('.question-text-scroll')) {
                         return;
                     }
@@ -1512,7 +1509,6 @@
                     }
                 }, { passive: true });
 
-                // Ensure question text box scrolling events never bubble up or get swallowed
                 const qTextEl = document.getElementById('q-text');
                 if (qTextEl) {
                     qTextEl.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
@@ -1633,6 +1629,7 @@
                 this.particles = [];
                 this.scrollOffset = 0;
                 this.aiTimer = 0;
+                this.nextStompDelay = 2.8;
 
                 this.updateHUD();
                 this.spawnSingleFood();
@@ -1653,20 +1650,24 @@
                 document.getElementById('food-display').innerText = `食物 ${this.foodCollectedCount} / 6`;
             }
 
-            /* SIGNIFICANT DIFFICULTY INCREASE IN STAGE 2 (AFTER QUESTION 3) */
+            /* GRADUAL, STUDENT-FRIENDLY DIFFICULTY PROGRESSION (STAGE 1 & STAGE 2) */
             triggerProceduralStomp() {
                 if (this.slippers.length > 0) return;
 
                 const isStage2 = this.foodCollectedCount >= 3;
+                const currentStageIdx = Math.min(Math.max(0, this.foodCollectedCount), 5);
 
-                const warningTimes = isStage2 ? [0.42, 0.40, 0.38] : [0.75, 0.68, 0.62];
-                const stageIndex = isStage2 ? Math.min(this.foodCollectedCount - 3, 2) : this.foodCollectedCount;
-                const warningDuration = warningTimes[stageIndex];
+                // Warning duration progression per food (Food 1: 0.90s -> Food 6: 0.55s)
+                const warningTimes = [0.90, 0.85, 0.80, 0.65, 0.60, 0.55];
+                const warningDuration = warningTimes[currentStageIdx];
 
-                const stompSpeedFactor = isStage2 ? 1.45 : 1.0;
+                // Gentle speed factor: Stage 1 = 1.0, Stage 2 = 1.15
+                const stompSpeedFactor = isStage2 ? 1.15 : 1.0;
 
+                // Forgiving targeting: Stage 1 = 50% player lane, Stage 2 = 60% player lane
+                const targetPlayerProb = isStage2 ? 0.60 : 0.50;
                 let targetLane;
-                if (Math.random() > 0.35) {
+                if (Math.random() < targetPlayerProb) {
                     targetLane = this.player.laneIndex;
                 } else {
                     targetLane = Math.floor(Math.random() * 3);
@@ -1674,8 +1675,9 @@
 
                 this.slippers.push(new Slipper(targetLane, warningDuration, stompSpeedFactor));
 
-                const baseDelays = isStage2 ? [1.0, 0.9, 0.85] : [2.4, 2.1, 1.8];
-                this.nextStompDelay = baseDelays[stageIndex] + (Math.random() * 0.2);
+                // Spawn interval progression (Food 1: 2.8s -> Food 6: 1.5s)
+                const baseDelays = [2.8, 2.5, 2.2, 1.8, 1.6, 1.5];
+                this.nextStompDelay = baseDelays[currentStageIdx] + (Math.random() * 0.2);
             }
 
             onStompImpact(laneIndex, impactX, impactY) {
@@ -1686,7 +1688,11 @@
                     this.particles.push(new DustParticle(impactX, impactY));
                 }
 
-                if (laneIndex === this.player.laneIndex) {
+                // Forgiving collision: player is only hit if in the targeted lane and within fair physical proximity
+                const isTargetLane = (this.player.laneIndex === laneIndex && this.player.targetX === LANES[laneIndex]);
+                const isPhysicallyClose = Math.abs(this.player.x - impactX) < 55;
+
+                if (isTargetLane && isPhysicallyClose) {
                     soundMgr.playSquash();
                     this.playerHit();
                 }
@@ -1714,7 +1720,6 @@
                 }
             }
 
-            /* REDESIGNED QUESTION POPUP WITH DEDICATED SCROLLABLE QUESTION TEXT & FIXED ANSWER BUTTONS */
             triggerQuestion(foodIndex) {
                 this.state = 'QUESTION';
                 soundMgr.playEating();
@@ -1723,7 +1728,7 @@
                 document.getElementById('q-counter').innerText = `第 ${foodIndex + 1} / 6 题`;
                 const qTextEl = document.getElementById('q-text');
                 qTextEl.innerText = qData.q;
-                qTextEl.scrollTop = 0; // Reset scroll position to top
+                qTextEl.scrollTop = 0;
 
                 const optionsContainer = document.getElementById('options-container');
                 optionsContainer.innerHTML = '';
@@ -1815,7 +1820,7 @@
                             this.spawnSingleFood();
                         }
 
-                        if (!this.currentFood.collecting && !this.currentFood.collected && Math.abs(this.currentFood.y - this.player.y) < 42 && this.currentFood.laneIndex === this.player.laneIndex) {
+                        if (!this.currentFood.collecting && !this.currentFood.collected && Math.abs(this.currentFood.y - this.player.y) < 46 && this.currentFood.laneIndex === this.player.laneIndex) {
                             this.currentFood.collecting = true;
                             this.foodCollectedCount++;
                             this.updateHUD();
@@ -1851,10 +1856,6 @@
                 }
             }
 
-            /* BACKGROUND LAYER RENDERING:
-               1. Scrolling Floor (level7_bg_land.png)
-               2. Fixed Kitchen Side (level7_bg_side.png)
-            */
             drawBackground() {
                 const ctx = this.ctx;
                 ctx.save();
