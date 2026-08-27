@@ -192,13 +192,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: transparent; /* Seamless overlay reveals world map directly underneath */
+            background: transparent;
             z-index: 999;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            pointer-events: auto; /* Keep button interactive */
+            pointer-events: auto;
             transition: opacity 0.5s ease-out 1.6s, visibility 0.5s ease-out 1.6s, filter 0.3s ease-out;
         }
 
@@ -295,7 +295,7 @@
             100% { background-position: 1000px -100px; }
         }
 
-        /* Redesigned 3D parting cloud separation directions */
+        /* Parting cloud separation directions */
         .cloud-intro-screen.separating .cloud-layer-1 {
             transform: translate3d(-100%, 0, 0) scale(1.1);
             opacity: 0;
@@ -382,7 +382,7 @@
             background: linear-gradient(135deg, #8a640f 0%, #b8860b 25%, #ffd700 50%, #b8860b 75%, #8a640f 100%);
             background-size: 200% 100%;
             border: 2px solid #ffd700;
-            border-radius: 4px; /* Medieval boxy framing */
+            border-radius: 4px;
             color: #0b0d10;
             font-family: Georgia, serif;
             font-size: 1.15rem;
@@ -396,7 +396,6 @@
             transition: border-color 0.3s, color 0.3s, background-position 0.4s;
             z-index: 12;
             
-            /* Ornamental corner cuts */
             clip-path: polygon(
                 0% 4px, 4px 0%, calc(100% - 4px) 0%, 100% 4px,
                 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px)
@@ -431,31 +430,27 @@
         }
 
         /* --- GAME VIEWPORT ADJUSTMENTS --- */
-
-        /* Scalable Main Game Wrapper */
         .game-wrapper {
             position: relative;
             width: 100%;
             height: 100vh;
-            height: 100dvh; /* Modern dynamic viewport height */
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            touch-action: none; /* Disables standard browser zooming/panning */
-            pointer-events: none; /* Shield inputs until clouds part fully */
+            touch-action: none;
+            pointer-events: none;
         }
 
-        /* Auto-interactive state if the intro has already been experienced */
         .intro-played .game-wrapper {
             pointer-events: auto !important;
         }
 
         .game-wrapper.interactive {
-            pointer-events: auto; /* Grant controls after cloud intro completes */
+            pointer-events: auto;
         }
 
-        /* Container with standard shadows on desktop, customized on mobile */
         .map-container {
             position: relative;
             display: inline-block;
@@ -467,7 +462,6 @@
             transform-style: preserve-3d;
         }
 
-        /* Remove border-radius and shadows on mobile for an edge-to-edge finish */
         @media (max-width: 768px) {
             .map-container {
                 border-radius: 0;
@@ -475,7 +469,6 @@
             }
         }
 
-        /* The map artwork layout */
         .map-bg {
             display: block;
             width: 100%;
@@ -483,7 +476,6 @@
             pointer-events: none;
         }
 
-        /* Overlay for interactive buttons */
         .interactive-overlay {
             position: absolute;
             top: 0;
@@ -494,7 +486,6 @@
             overflow: visible;
         }
 
-        /* Universal Mission Badge Layer */
         .mission-badge {
             position: absolute;
             width: 9.3%; 
@@ -518,9 +509,6 @@
                         box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* --- STATE SYSTEM SPECIFIC STYLING --- */
-
-        /* State 1: Available Stage styling (glowing guidance) */
         .mission-badge[data-state="available"] {
             animation: availablePulse 2.2s infinite alternate ease-in-out;
         }
@@ -534,13 +522,11 @@
             }
         }
 
-        /* State 2: Locked Stage styling (retains color with slight dimming) */
         .mission-badge[data-state="locked"] {
             filter: brightness(0.8);
             cursor: not-allowed;
         }
 
-        /* Gold Lock Overlay Container */
         .lock-overlay {
             position: absolute;
             top: 0;
@@ -554,9 +540,6 @@
             z-index: 2;
         }
 
-        /* --- STATE 3: PREMIUM AAA-STYLE COMPLETED STAGE EFFECTS --- */
-
-        /* Layer 1: Soft breathing inner golden edge glow */
         .inner-glow-layer {
             position: absolute;
             top: 0;
@@ -582,7 +565,6 @@
             }
         }
 
-        /* Layer 2: Moving golden energy thin halo */
         .rotating-halo-layer {
             position: absolute;
             top: -6%;
@@ -612,7 +594,6 @@
             }
         }
 
-        /* Layer 3: Sparkling organic stars */
         .sparkles-container {
             position: absolute;
             top: 0;
@@ -623,7 +604,6 @@
             z-index: 2;
         }
 
-        /* 4-point golden energy stars (Uses CSS polygons for absolute performance) */
         .sparkle {
             position: absolute;
             top: 50%;
@@ -649,7 +629,6 @@
             }
         }
 
-        /* Layer 4: Click radial burst container */
         .click-burst-layer {
             position: absolute;
             top: -20%;
@@ -664,7 +643,6 @@
             transform: scale(0.5);
         }
 
-        /* Active click sequence transitions */
         .mission-badge.burst-active .click-burst-layer {
             animation: clickFlash 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
         }
@@ -685,7 +663,6 @@
             }
         }
 
-        /* Heightened Halo burst acceleration during clicked state */
         .mission-badge.burst-active .rotating-halo-layer {
             animation: haloBurst 0.4s ease-out forwards !important;
         }
@@ -704,7 +681,6 @@
             }
         }
 
-        /* Image inside badge */
         .badge-img {
             display: block;
             width: 100%;
@@ -713,13 +689,11 @@
             pointer-events: none;
         }
 
-        /* --- BADGE 9 PERMANENT CHAMPION EFFECTS --- */
         .mission-badge[data-champion="true"] {
             animation: championBadgePulse 6s ease-in-out infinite !important;
             z-index: 5;
         }
 
-        /* Gentle pulse once every 6 seconds (100% -> 104% -> 100%) */
         @keyframes championBadgePulse {
             0%, 88%, 100% {
                 transform: translate3d(-50%, -50%, 0) scale(1);
@@ -729,7 +703,6 @@
             }
         }
 
-        /* Soft Golden Aura Breathing Glow */
         .champion-glow-layer {
             position: absolute;
             top: -16%;
@@ -754,7 +727,6 @@
             }
         }
 
-        /* Gold Medal Light Sweep / Shimmer Layer (~800ms sweep every 10 seconds) */
         .champion-shimmer-layer {
             position: absolute;
             top: 0;
@@ -805,7 +777,6 @@
             }
         }
 
-        /* Floating Sparkle Particles */
         .champion-sparkle {
             position: absolute;
             width: 7px;
@@ -833,16 +804,14 @@
             }
         }
 
-        /* Hover Behavior (Desktop Only - Scoped to avoid Locked badges) */
         @media (hover: hover) {
             .mission-badge[data-state="available"]:hover,
             .mission-badge[data-state="completed"]:hover {
-                animation: none; /* Disable default pulsing during hover zoom */
+                animation: none;
                 transform: translate3d(-50%, calc(-50% - 2px), 0) scale(1.05);
                 filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.6)) brightness(1.08);
             }
 
-            /* Premium, subtle completed-only hover feedback overlays */
             .mission-badge[data-state="completed"]:hover .inner-glow-layer {
                 box-shadow: 0 0 24px rgba(255, 215, 0, 0.85), inset 0 0 18px rgba(255, 215, 0, 0.4);
                 filter: brightness(1.15);
@@ -851,16 +820,15 @@
             .mission-badge[data-state="completed"]:hover .rotating-halo-layer {
                 border-width: 2px;
                 filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.85)) brightness(1.2);
-                animation-duration: calc(var(--halo-speed, 10s) * 0.6); /* Accelerates rotation on hover */
+                animation-duration: calc(var(--halo-speed, 10s) * 0.6);
             }
 
             .mission-badge[data-state="completed"]:hover .sparkle {
                 filter: brightness(1.25);
-                animation-duration: calc(var(--sp-duration, 3.2s) * 0.55); /* Heightened sparkle frequency */
+                animation-duration: calc(var(--sp-duration, 3.2s) * 0.55);
             }
         }
 
-        /* Active Sequence (Pop & Glow Bounce) */
         .mission-badge.clicked {
             pointer-events: none;
             animation: badgeBounceAndGlow 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
@@ -882,7 +850,6 @@
             }
         }
 
-        /* Shine Sweep Overlay */
         .mission-badge::after {
             content: '';
             position: absolute;
@@ -921,7 +888,6 @@
             }
         }
 
-        /* Transparent Hotspots */
         .ui-button {
             position: absolute;
             transform: translate(-50%, -50%);
@@ -1091,10 +1057,10 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: rgba(0, 0, 0, 0.45); /* Soft dark overlay reveals fireworks & map underneath */
+            background-color: rgba(0, 0, 0, 0.45);
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
-            z-index: 100000; /* Positioned cleanly above fireworks canvas (z-index 99999) */
+            z-index: 100000;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -1110,21 +1076,19 @@
             pointer-events: auto;
         }
 
-        /* Banner Container (Portrait Mobile Center Frame) */
         .victory-banner-container {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 85%; /* 80%~90% screen width on mobile */
+            width: 85%;
             max-width: 440px;
             opacity: 0;
             transform: scale(0.9);
             will-change: transform, opacity;
         }
 
-        /* 700ms Scale 90% -> 105% -> 100% Animation Sequence */
         .victory-modal-overlay.active .victory-banner-container {
             animation: victoryBannerEnter 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
@@ -1144,7 +1108,6 @@
             }
         }
 
-        /* Existing PNG Victory Banner Image */
         .victory-banner-img {
             width: 100%;
             height: auto;
@@ -1153,9 +1116,8 @@
             filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.35));
         }
 
-        /* Primary "返回主地图" Button Positioned Below Image with 24px Spacing */
         .victory-home-btn {
-            margin-top: 24px; /* 20~30px spacing below image */
+            margin-top: 24px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1181,7 +1143,6 @@
             );
         }
 
-        /* Reveal button smoothly right after the banner scale animation finishes */
         .victory-modal-overlay.active .victory-home-btn {
             animation: buttonFadeIn 0.4s ease 0.7s forwards;
         }
@@ -1204,7 +1165,7 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background-color: rgba(11, 13, 16, 0.35); /* ~35% darkness so map is visible behind */
+            background-color: rgba(11, 13, 16, 0.35);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             z-index: 10000;
@@ -1303,16 +1264,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 14px;
+            padding: 11px 14px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 215, 0, 0.15);
             border-radius: 8px;
-            transition: background 0.2s, border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         .adventure-card[data-completed="true"] {
             background: rgba(184, 134, 11, 0.12);
-            border-color: rgba(255, 215, 0, 0.35);
+            border-color: rgba(255, 215, 0, 0.4);
+            cursor: pointer;
+        }
+
+        @media (hover: hover) {
+            .adventure-card[data-completed="true"]:hover {
+                background: rgba(184, 134, 11, 0.22);
+                border-color: #ffd700;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+            }
+        }
+
+        .adventure-card[data-completed="true"]:active {
+            transform: scale(0.98);
         }
 
         .adventure-card-info {
@@ -1327,6 +1302,21 @@
             font-weight: bold;
             color: #f3f4f6;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .adventure-card[data-completed="true"] .adventure-card-name::after {
+            content: '📖 回顾';
+            font-size: 0.72rem;
+            font-family: -apple-system, sans-serif;
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: normal;
         }
 
         .adventure-card-stars {
@@ -1338,7 +1328,7 @@
         .adventure-card-status {
             font-size: 0.85rem;
             font-weight: bold;
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 4px;
             display: flex;
             align-items: center;
@@ -1414,6 +1404,223 @@
             color: #ffffff;
             border-color: rgba(255, 215, 0, 0.4);
         }
+
+        /* --- 📖 SEJARAH QUESTION REVIEW MODAL --- */
+        .review-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background-color: rgba(5, 7, 10, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 10001; /* Layered cleanly above Adventure Record */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .review-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .review-modal-content {
+            position: relative;
+            width: 92%;
+            max-width: 440px;
+            max-height: 88vh;
+            max-height: 88dvh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(165deg, rgba(17, 24, 39, 0.98) 0%, rgba(11, 16, 27, 0.99) 100%);
+            border: 2px solid #b8860b;
+            border-radius: 12px;
+            padding: 22px 18px 18px 18px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(255, 215, 0, 0.25), inset 0 0 15px rgba(255, 215, 0, 0.08);
+            transform: scale(0.94);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            color: #e0e4eb;
+            overflow: hidden;
+        }
+
+        .review-modal-overlay.active .review-modal-content {
+            transform: scale(1);
+        }
+
+        .review-header {
+            text-align: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+        }
+
+        .review-title {
+            font-family: Georgia, serif;
+            font-size: 1.3rem;
+            color: #ffd700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .review-subtitle {
+            font-size: 0.85rem;
+            color: #f6ad55;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .review-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #b8860b rgba(255, 255, 255, 0.05);
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .review-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .review-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        .review-list::-webkit-scrollbar-thumb {
+            background: #b8860b;
+            border-radius: 3px;
+        }
+
+        /* Question Revision Card */
+        .review-q-card {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .review-q-header {
+            font-family: Georgia, serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 1px;
+        }
+
+        .review-q-text {
+            font-size: 0.95rem;
+            line-height: 1.55;
+            color: #f1f5f9;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        .review-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .review-option {
+            padding: 7px 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        /* Highlighted Correct Answer Option Row */
+        .review-option.is-correct {
+            background: rgba(74, 222, 128, 0.12);
+            border-color: rgba(74, 222, 128, 0.4);
+            color: #86efac;
+            font-weight: 500;
+        }
+
+        /* Clear Answer Ribbon */
+        .review-correct-ribbon {
+            margin-top: 4px;
+            padding: 8px 12px;
+            background: linear-gradient(90deg, rgba(74, 222, 128, 0.18) 0%, rgba(184, 134, 11, 0.18) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.92rem;
+            font-weight: bold;
+            color: #4ade80;
+            letter-spacing: 0.5px;
+        }
+
+        .review-correct-ribbon .ans-label {
+            color: #ffd700;
+        }
+
+        .review-correct-ribbon .ans-val {
+            color: #4ade80;
+        }
+
+        .review-empty-state {
+            text-align: center;
+            padding: 30px 10px;
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .review-close-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #8a640f 0%, #b8860b 50%, #8a640f 100%);
+            border: 1px solid #ffd700;
+            border-radius: 6px;
+            color: #0b0d10;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .review-close-btn:hover {
+            background: linear-gradient(135deg, #a67913 0%, #ffd700 50%, #a67913 100%);
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+            color: #000000;
+        }
+
+        .review-close-btn:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -1437,15 +1644,11 @@
 
     <!-- Cinematic Cloud Intro Overlay Screen -->
     <div class="cloud-intro-screen" id="cloudIntroScreen">
-        <!-- Soft top sunlight glow behind clouds -->
         <div class="sunlight-glow"></div>
-
-        <!-- Three independent seamless transparent PNG cloud layers -->
         <div class="cloud-layer cloud-layer-1"></div>
         <div class="cloud-layer cloud-layer-2"></div>
         <div class="cloud-layer cloud-layer-3"></div>
         
-        <!-- Floating Medieval gold button container -->
         <div class="intro-content">
             <div class="button-wrapper">
                 <button class="intro-start-btn" id="btnEnterMap">进入地图</button>
@@ -1455,17 +1658,11 @@
         </div>
     </div>
 
-    <!-- Main Game Viewport (Uncovered directly by clouds) -->
+    <!-- Main Game Viewport -->
     <div class="game-wrapper" id="gameViewport">
         <div class="map-container" id="mapLayer">
-            <!-- Background Map Image (Source resolved programmatically) -->
             <img alt="Game Selection Map" class="map-bg" id="mapImage">
-            
-            <!-- Dynamic Interactive Overlays Layer -->
-            <div class="interactive-overlay" id="interactiveOverlay">
-                <!-- UI Buttons (Invisible pointer hotspots) -->
-                <!-- Populated dynamically to ensure structural integrity -->
-            </div>
+            <div class="interactive-overlay" id="interactiveOverlay"></div>
         </div>
     </div>
 
@@ -1492,7 +1689,7 @@
         </div>
     </div>
 
-    <!-- Final Victory Celebration Banner Overlay using victory_banner.png -->
+    <!-- Final Victory Celebration Banner Overlay -->
     <div class="victory-modal-overlay" id="victoryModal" style="display: none;">
         <div class="victory-banner-container" id="victoryBanner">
             <img class="victory-banner-img" src="victory_banner.png" alt="Victory Banner">
@@ -1508,7 +1705,7 @@
             <button class="menu-close-btn" id="btnAdventureXClose" aria-label="Close">&times;</button>
             <div class="adventure-header">
                 <h2 class="adventure-title">🧭 Adventure Record</h2>
-                <div class="adventure-subtitle">你的历史探险纪录</div>
+                <div class="adventure-subtitle">你的历史探险纪录 · 点击已通关卡回顾题目</div>
             </div>
             
             <div class="adventure-list" id="adventureList">
@@ -1530,11 +1727,28 @@
         </div>
     </div>
 
+    <!-- 📖 Sejarah Question Review Modal -->
+    <div class="review-modal-overlay" id="questionReviewModal" style="display: none;">
+        <div class="review-modal-content">
+            <button class="menu-close-btn" id="btnReviewXClose" aria-label="Close">&times;</button>
+            <div class="review-header">
+                <h2 class="review-title">📖 Sejarah 题目回顾</h2>
+                <div class="review-subtitle" id="reviewSubtitle">LEVEL 1 · 碰个大西瓜</div>
+            </div>
+
+            <div class="review-list" id="reviewQuestionList">
+                <!-- Dynamically populated Sejarah questions -->
+            </div>
+
+            <button class="review-close-btn" id="btnReviewClose">关闭</button>
+        </div>
+    </div>
+
     <script>
         // --- HELPER FOR 1-HOUR CLOUD INTRO COOLDOWN SYSTEM ---
         function shouldShowCloudIntro() {
             const lastIntroTime = Number(localStorage.getItem("introLastPlayedAt"));
-            const introCooldown = 60 * 60 * 1000; // 1 hour cooldown duration
+            const introCooldown = 60 * 60 * 1000;
             return !lastIntroTime || (Date.now() - lastIntroTime >= introCooldown);
         }
 
@@ -1542,7 +1756,6 @@
         const GameProgression = {
             STORAGE_KEY: 'game_level_progression_v1',
 
-            // Read raw localStorage data, falling back to a structured default state
             getProgress() {
                 try {
                     const saved = localStorage.getItem(this.STORAGE_KEY);
@@ -1555,7 +1768,6 @@
                 return this.getInitialState();
             },
 
-            // Extensible structure supporting progression, scores, stats, stars, achievements, etc.
             getInitialState() {
                 return {
                     levels: {
@@ -1569,7 +1781,6 @@
                 };
             },
 
-            // Safe localStorage storage write
             save(progress) {
                 try {
                     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(progress));
@@ -1578,23 +1789,19 @@
                 }
             },
 
-            // Returns status of current level unlock state
             isUnlocked(levelId) {
                 const id = parseInt(levelId);
-                if (id === 1) return true; // Level 1 remains unlocked initially
-                
+                if (id === 1) return true;
                 const progress = this.getProgress();
                 return !!(progress.levels[id] && progress.levels[id].unlocked);
             },
 
-            // Returns status of level completion state
             isCompleted(levelId) {
                 const id = parseInt(levelId);
                 const progress = this.getProgress();
                 return !!(progress.levels[id] && progress.levels[id].completed);
             },
 
-            // Modular trigger to complete a level. Automatically unlocks the subsequent level.
             completeLevel(levelId, data = {}) {
                 const id = parseInt(levelId);
                 const progress = this.getProgress();
@@ -1605,11 +1812,9 @@
                 progress.levels[id].completed = true;
                 progress.levels[id].unlocked = true;
 
-                // Merge extension data (optional)
                 if (data.stars !== undefined) progress.levels[id].stars = data.stars;
                 if (data.score !== undefined) progress.levels[id].score = data.score;
 
-                // Unlock next level (Up to index boundary 9)
                 const nextId = id + 1;
                 if (nextId <= 9) {
                     if (!progress.levels[nextId]) {
@@ -1618,7 +1823,6 @@
                     progress.levels[nextId].unlocked = true;
                 }
 
-                // Recalculate statistics dynamically
                 let totalScore = 0;
                 let completedCount = 0;
                 Object.keys(progress.levels).forEach(k => {
@@ -1631,7 +1835,6 @@
 
                 this.save(progress);
 
-                // Set Level 9 completion trigger flag
                 if (id === 9) {
                     localStorage.setItem('level9JustCompleted', 'true');
                 }
@@ -1639,12 +1842,11 @@
                 return progress;
             },
 
-            // Resets progress tracking back to state initialization
             resetProgression() {
                 const init = this.getInitialState();
                 this.save(init);
-                localStorage.removeItem("introLastPlayedAt"); // Resets the 1-hour intro cooldown
-                localStorage.removeItem("introPlayed");      // Clean up legacy key if existing
+                localStorage.removeItem("introLastPlayedAt");
+                localStorage.removeItem("introPlayed");
                 localStorage.removeItem("level9JustCompleted");
                 localStorage.removeItem("level9Celebrated");
                 sessionStorage.removeItem("introPlayed");
@@ -1652,8 +1854,665 @@
             }
         };
 
-        // Exposed globally to allow sub-levels/iframes to trigger unlocks on level completion
         window.GameProgression = GameProgression;
+
+        // --- 📖 LEVEL TITLES ---
+        const LEVEL_TITLES = {
+            1: "碰个大西瓜",
+            2: "金字塔探秘",
+            3: "古罗马斗兽场",
+            4: "马六甲海峡",
+            5: "丝绸之路",
+            6: "吴哥窟遗址",
+            7: "玛雅天文台",
+            8: "阿兹特克太阳神殿",
+            9: "王者之巅"
+        };
+
+        // --- 📖 COMPLETE AUTHENTIC SEJARAH QUESTION BANK (LEVELS 1–9) ---
+        const QUESTION_BANK = {
+            1: [
+                {
+                    question: "Apabila berakhirnya Tamadun Indus, berlaku perubahan dalam perkembangan Tamadun India.\nPusat perkembangan Tamadun India beralih ke",
+                    options: [
+                        "A. Lembah Indus",
+                        "B. Lembah Ganges",
+                        "C. Sungai Godaveri",
+                        "D. Sungai Mahanadi"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Lembah Ganges"
+                },
+                {
+                    question: "Istilah berikut berkaitan dengan kerajaan Tamadun India.\n·Mahajanapada\nIstilah tersebut merujuk kepada kerajaan______",
+                    options: [
+                        "A. Lama",
+                        "B. Kecil",
+                        "C. Besar",
+                        "D. baharu"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Besar"
+                },
+                {
+                    question: "Pada zaman Dinasti Qin, Pendidikan memberi penekanan kepada",
+                    options: [
+                        "A. nilai moral",
+                        "B. keagamaan",
+                        "C. kemahiran teknikal",
+                        "D. pemahaman undang-undang"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "kemahiran teknikal"
+                },
+                {
+                    question: "Apakah kerajaan yang muncul sebagai kuasa penting di timur laut India antara tahun 540 SM hingga 490 SM?",
+                    options: [
+                        "A. Gupta",
+                        "B. Magadha",
+                        "C. Maurya",
+                        "D. Nanda"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Magadha"
+                },
+                {
+                    question: "Apakah sumbangan penting Maharaja Shi Huangdi terhadap China?",
+                    options: [
+                        "A. Mengasaskan Dinasti Han",
+                        "B. Menyatukan China",
+                        "C. Membuka Laluan Sutera",
+                        "D. Mencipta kertas"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Menyatukan China"
+                }
+            ],
+            2: [
+                {
+                    question: "1. Apakah faktor yang mempengaruhi sesebuah kerajaan menjalankan dasar perluasan kuasa?\nI. Kewangan\nII. Dasar ekonomi\nIII. Kehendak rakyat\nIV. Dasar pemerintahan",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "I dan IV"
+                },
+                {
+                    question: "2. Dalam masyarakat China, seseorang individu boleh meningkatkan taraf sosialnya ke arah kehidupan yang lebih baik. Bagaimanakah matlamat tersebut boleh dicapai?",
+                    options: [
+                        "A. Menyertai pasukan tentera",
+                        "B. Mencari kehidupan di bandar",
+                        "C. Terlibat dalam aktiviti perdagangan",
+                        "D. Lulus dalam peperiksaan perkhidmatan awam"
+                    ],
+                    correctAnswer: "D",
+                    correctText: "Lulus dalam peperiksaan perkhidmatan awam"
+                },
+                {
+                    question: "3. Apakah kelebihan kedudukan Magadha di Lembah Ganges?",
+                    options: [
+                        "A. Mengawal laluan perdagangan utama",
+                        "B. Menguasai kawasan pergunungan",
+                        "C. Mengawal Laluan Sutera",
+                        "D. Membina pelabuhan utama"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Mengawal laluan perdagangan utama"
+                },
+                {
+                    question: "4. Raja Zheng kemudiannya menggunakan gelaran",
+                    options: [
+                        "A. Maharaja Gaozu",
+                        "B. Maharaja Han Wu Di",
+                        "C. Maharaja Shi Huangdi",
+                        "D. Kaviraja"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Maharaja Shi Huangdi"
+                },
+                {
+                    question: "5. Siapakah pengasas Dinasti Han?",
+                    options: [
+                        "A. Liu Bang",
+                        "B. Cai Lun",
+                        "C. Han Fei Zi",
+                        "D. Konfusius"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Liu Bang"
+                }
+            ],
+            3: [
+                {
+                    question: "Perluasan fizikal dilakukan oleh sesebuah kerajaan dengan menguasai wilayah-wilayah lain.\n\nFaktor manakah paling penting membolehkan perluasan kuasa tersebut tercapai?",
+                    options: [
+                        "A. Diplomasi",
+                        "B. Jolak ansur",
+                        "C. Kekuatan tentera",
+                        "D. Sokongan penduduk"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Kekuatan tentera"
+                },
+                {
+                    question: "Kepentingan Pendidikan dalam Tamadun China menyebabkan perkembangan yang pesat dalam Pendidikan negara.\n\nApakah matlamat sistem Pendidikan Tamadun China?\nI. Memilih pegawai kerajaan\nII. Memupuk nilai moral\nIII. Menyelaraskan Bahasa\nIV. Mengawal tingkah laku manusia",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "I dan IV"
+                },
+                {
+                    question: "Kerajaan-kerajaan kecil yang muncul di sekitar Lembah Ganges dikenali sebagai",
+                    options: [
+                        "A. mahajanapada",
+                        "B. janapada",
+                        "C. empayar",
+                        "D. wilayah"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "janapada"
+                },
+                {
+                    question: "Apakah pusat pemerintahan Dinasti Qin?",
+                    options: [
+                        "A. Chang'an",
+                        "B. Xianyang",
+                        "C. Loyang",
+                        "D. Pataliputra"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Xianyang"
+                },
+                {
+                    question: "Di manakah pusat pemerintahan Han Awal?",
+                    options: [
+                        "A. Xianyang",
+                        "B. Loyang",
+                        "C. Chang'an",
+                        "D. Beijing"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Chang'an"
+                }
+            ],
+            4: [
+                {
+                    question: "Apakah peristiwa yang menyebabkan Asoka mengubah dasar perluasan kuasa daripada perluasan fizikal kepada perluasan keagamaan?",
+                    options: [
+                        "A. Perang Kalinga",
+                        "B. Perebutan takhta",
+                        "C. Serangan orang Aryan",
+                        "D. Tuntutan penduduk tempatan"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Perang Kalinga"
+                },
+                {
+                    question: "Peperiksaan perkhidmatan awam merupakan komponen paling penting dalam sistem Pendidikan dan kehidupan masyarakat China.\n\nApakah kepentingan peperiksaan tersebut kepada seseorang individu?\n\nI. Menerima penghormatan\nII. Meningkatkan taraf social\nIII. Menjadi pegawai di istana raja\nIV. Melanjutkan pelajaran ke luar negara",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "I dan II"
+                },
+                {
+                    question: "Apakah yang berlaku apabila kerajaan-kerajaan kecil di Lembah Ganges berkembang menjadi lebih besar?",
+                    options: [
+                        "A. Terbentuk mahajanapada",
+                        "B. Terbentuk Laluan Sutera",
+                        "C. Bermula Dinasti Han",
+                        "D. Bermula Perang Kalinga"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Terbentuk mahajanapada"
+                },
+                {
+                    question: "Tamadun China muncul di sekitar lembah sungai yang manakah?",
+                    options: [
+                        "A. Sungai Ganges",
+                        "B. Sungai Indus",
+                        "C. Sungai Huang He",
+                        "D. Sungai Mekong"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Sungai Huang He"
+                },
+                {
+                    question: "Apakah gelaran yang digunakan oleh Liu Bang?",
+                    options: [
+                        "A. Maharaja Shi Huangdi",
+                        "B. Maharaja Gaozu",
+                        "C. Maharaja Wu",
+                        "D. Kaviraja"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Maharaja Gaozu"
+                }
+            ],
+            5: [
+                {
+                    question: "Arthasastra\n\nIsi kandungan buku tersebut adalah berkaitan dengan\n\nI. Ketenteraan\nII. Kebudayaan\nIII. Sistem perdagangan\nIV. Sistem pemerintahan",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "I dan IV"
+                },
+                {
+                    question: "Apakah pusat pemerintahan Dinasti Nanda?",
+                    options: [
+                        "A. Chang'an",
+                        "B. Xianyang",
+                        "C. Pataliputra",
+                        "D. Loyang"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Pataliputra"
+                },
+                {
+                    question: "Mengapakah Raja Samudragupta dikenali sebagai Kaviraja?",
+                    options: [
+                        "A. Baginda membina banyak sekolah",
+                        "B. Baginda meminati puisi berbentuk keagamaan",
+                        "C. Baginda menyebarkan agama Buddha",
+                        "D. Baginda menulis buku Arthasastra"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Baginda meminati puisi berbentuk keagamaan"
+                },
+                {
+                    question: "Di manakah pusat pemerintahan Han Akhir?",
+                    options: [
+                        "A. Loyang",
+                        "B. Chang'an",
+                        "C. Xianyang",
+                        "D. Pataliputra"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Loyang"
+                },
+                {
+                    question: "Siapakah yang akan diserapkan ke dalam sistem perkhidmatan kerajaan China?",
+                    options: [
+                        "A. Semua calon lelaki",
+                        "B. Calon daripada golongan elit sahaja",
+                        "C. Mereka yang lulus dengan cemerlang",
+                        "D. Mereka yang berasal daripada keluarga diraja"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Mereka yang lulus dengan cemerlang"
+                },
+                {
+                    question: "Antara berikut, yang manakah merupakan faktor perluasan kuasa yang memastikan sesebuah kerajaan dapat ditadbir dengan baik dan berkesan?",
+                    options: [
+                        "A. Sumber manusia",
+                        "B. Laluan perdagangan",
+                        "C. Sistem pendidikan",
+                        "D. Kedudukan geografi"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Sumber manusia"
+                }
+            ],
+            6: [
+                {
+                    question: "Pada zaman pemerintahan Dinasti Gupta, penekanan diberikan kepada agama...",
+                    options: [
+                        "A. Islam",
+                        "B. Hindu",
+                        "C. Buddha",
+                        "D. Kristian"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Hindu"
+                },
+                {
+                    question: "Apakah ciri-ciri sistem peperiksaan perkhidmatan awam China?\n\nI. Berasaskan falsafah legalisme\nII. Terbuka calon lelaki sahaja\nIII. Mengekalkan tradisi dan budaya China\nIV. Berubah mengikut kesesuaian masa",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "II dan III"
+                },
+                {
+                    question: "Empayar Dinasti Nanda berkembang dari Bengal hingga ke",
+                    options: [
+                        "A. Punjab dan Deccan",
+                        "B. Tibet dan Nepal",
+                        "C. Hindu Kush dan Korea",
+                        "D. Vietnam dan Burma"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Punjab dan Deccan"
+                },
+                {
+                    question: "Misi penyebaran agama Buddha ke Asia Tenggara diketuai oleh",
+                    options: [
+                        "A. Sona dan Uttara",
+                        "B. Mahendra dan Kautilya",
+                        "C. Asoka dan Mahendra",
+                        "D. Sona dan Samudragupta"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Sona dan Uttara"
+                },
+                {
+                    question: "Laluan Sutera menghubungkan China dengan",
+                    options: [
+                        "A. Empayar Rom",
+                        "B. India sahaja",
+                        "C. Asia Tenggara sahaja",
+                        "D. Korea sahaja"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Empayar Rom"
+                },
+                {
+                    question: "Apakah tumpuan utama pendidikan tinggi dalam Tamadun China?",
+                    options: [
+                        "A. Menghafal tulisan sahaja",
+                        "B. Menulis sajak sahaja",
+                        "C. Menterjemahkan dan menginterpretasikan buku suci",
+                        "D. Mempelajari perdagangan"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Menterjemahkan dan menginterpretasikan buku suci"
+                }
+            ],
+            7: [
+                {
+                    question: "Berikut merupakan laluan kepesatan perdagangan yang menyebabkan Tamadun India berkembang.\nApakah laluan utama tersebut?\nI.Laluan daratan\nII.Kebudayaan\nIII. Sistem pentadbiran\nIV. Laluan maritim",
+                    options: [
+                        "A. I dan II",
+                        "B. I dan IV",
+                        "C. II dan III",
+                        "D. III dan IV"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "I dan IV"
+                },
+                {
+                    question: "Peperiksaan perkhidmatan awam merupakan komponen paling penting dalam sistem pendidikan masyarakat China.\nPeperiksaan tersebut adalah berkisarkan...",
+                    options: [
+                        "A. Salasilah kerabat diraja",
+                        "B. Sejarah negara China",
+                        "C. Sembilan Buku Suci",
+                        "D. Sistem perundangan"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Salasilah kerabat diraja"
+                },
+                {
+                    question: "Antara berikut, yang manakah merupakan bilangan tentera bergajah Dinasti Nanda?",
+                    options: [
+                        "A. 3,000",
+                        "B. 9,000",
+                        "C. 20,000",
+                        "D. 30,000"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "3,000"
+                },
+                {
+                    question: "Siapakah yang mengetuai misi penyebaran agama Buddha ke Sri Lanka?",
+                    options: [
+                        "A. Sona",
+                        "B. Uttara",
+                        "C. Mahendra",
+                        "D. Kautilya"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Mahendra"
+                },
+                {
+                    question: "Pendidikan di China bermula sejak zaman Dinasti",
+                    options: [
+                        "A. Qin",
+                        "B. Han",
+                        "C. Shang",
+                        "D. Maurya"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Shang"
+                },
+                {
+                    question: "Apakah tumpuan utama pendidikan menengah dalam Tamadun China?",
+                    options: [
+                        "A. Menghafal buku suci",
+                        "B. Menulis karangan dan sajak",
+                        "C. Menterjemahkan buku suci",
+                        "D. Mempelajari teknik ketenteraan"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Menulis karangan dan sajak"
+                }
+            ],
+            8: [
+                {
+                    question: "Konfusius merupakan seorang ahli falsafah yang terkemuka di China.\nApakah karya beliau yang terkenal?",
+                    correctText: "Lun Yu"
+                },
+                {
+                    question: "Siapakah dua pemerintah yang menggunakan kekuatan ketenteraan sebagai asas perluasan kuasa Dinasti Maurya?",
+                    correctText: "Chandragupta Maurya dan Asoka"
+                },
+                {
+                    question: "Apakah tujuan peraturan dan undang-undang pemerintahan Asoka diukir pada tiang batu?",
+                    correctText: "Mengukuhkan pembinaan negara"
+                },
+                {
+                    question: "Pendidikan di China berkembang ketika zaman Dinasti",
+                    correctText: "Zhou"
+                },
+                {
+                    question: "Mengapakah sumber kewangan penting dalam usaha perluasan kuasa sesebuah kerajaan?",
+                    correctText: "Membiayai usaha perluasan kuasa"
+                },
+                {
+                    question: "Apakah fungsi pasukan tentera selain digunakan untuk memperluas kuasa?",
+                    correctText: "Mempertahankan negara daripada serangan musuh"
+                }
+            ],
+            9: [
+                {
+                    question: "Mengikut Han Fei Zi, tingkah laku manusia boleh dikawal melalui",
+                    options: [
+                        "A. Ajaran agama",
+                        "B. Sistem Pendidikan",
+                        "C. Ketegasan undang-undang",
+                        "D. Didikan institusi kekeluargaan"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Ketegasan undang-undang"
+                },
+                {
+                    question: "Empayar Maurya meliputi wilayah Bengal hingga ke",
+                    options: [
+                        "A. Deccan",
+                        "B. Vietnam",
+                        "C. Hindu Kush",
+                        "D. Gurun Gobi"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Hindu Kush"
+                },
+                {
+                    question: "Siapakah pemerintah yang menerajui Dinasti Gupta antara tahun 320 M hingga 335 M?",
+                    options: [
+                        "A. Chandragupta I",
+                        "B. Chandragupta Maurya",
+                        "C. Asoka",
+                        "D. Samudragupta"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Chandragupta I"
+                },
+                {
+                    question: "Siapakah tokoh yang memperkenalkan teknologi pembuatan kertas?",
+                    options: [
+                        "A. Konfusius",
+                        "B. Han Fei Zi",
+                        "C. Cai Lun",
+                        "D. Liu Bang"
+                    ],
+                    correctAnswer: "C",
+                    correctText: "Cai Lun"
+                },
+                {
+                    question: "Apakah syarat penting yang membolehkan perluasan kuasa fizikal dilaksanakan dengan berkesan?",
+                    options: [
+                        "A. Kekuatan dan disiplin pasukan tentera",
+                        "B. Kemajuan dalam kesusasteraan",
+                        "C. Penyebaran ajaran Konfusianisme",
+                        "D. Pembinaan sekolah tinggi"
+                    ],
+                    correctAnswer: "A",
+                    correctText: "Kekuatan dan disiplin pasukan tentera"
+                },
+                {
+                    question: "Apakah perubahan yang berlaku dalam corak pemerintahan Asoka selepas penaklukan Kalinga?",
+                    options: [
+                        "A. Menjadi lebih tegas dan agresif",
+                        "B. Menjadi lebih toleran dan bertanggungjawab",
+                        "C. Menghapuskan semua kegiatan keagamaan",
+                        "D. Memindahkan pusat pemerintahan"
+                    ],
+                    correctAnswer: "B",
+                    correctText: "Menjadi lebih toleran dan bertanggungjawab"
+                }
+            ]
+        };
+
+        // --- 📖 SEJARAH QUESTION REVIEW MODULE ---
+        const QuestionReview = {
+            modalEl: null,
+            listEl: null,
+            subtitleEl: null,
+            isInitialized: false,
+
+            init() {
+                if (this.isInitialized) return;
+                this.modalEl = document.getElementById('questionReviewModal');
+                this.listEl = document.getElementById('reviewQuestionList');
+                this.subtitleEl = document.getElementById('reviewSubtitle');
+
+                const btnClose = document.getElementById('btnReviewClose');
+                const xClose = document.getElementById('btnReviewXClose');
+
+                if (btnClose) {
+                    btnClose.addEventListener('click', () => {
+                        playClickSound();
+                        this.close();
+                    });
+                }
+                if (xClose) {
+                    xClose.addEventListener('click', () => {
+                        playClickSound();
+                        this.close();
+                    });
+                }
+
+                if (this.modalEl) {
+                    this.modalEl.addEventListener('click', (e) => {
+                        if (e.target === this.modalEl) {
+                            playClickSound();
+                            this.close();
+                        }
+                    });
+                }
+                this.isInitialized = true;
+            },
+
+            open(levelId) {
+                this.init();
+                const id = parseInt(levelId);
+                const levelName = LEVEL_TITLES[id] || `关卡 ${id}`;
+                if (this.subtitleEl) {
+                    this.subtitleEl.textContent = `LEVEL ${id} · ${levelName}`;
+                }
+
+                const questions = QUESTION_BANK[id];
+                if (!questions || questions.length === 0) {
+                    this.listEl.innerHTML = `
+                        <div class="review-empty-state">
+                            📜 该关卡题目正在整理中，敬请期待！
+                        </div>
+                    `;
+                } else {
+                    let html = '';
+                    questions.forEach((q, index) => {
+                        const hasOptions = Array.isArray(q.options) && q.options.length > 0;
+                        let optionsHtml = '';
+
+                        if (hasOptions) {
+                            q.options.forEach(opt => {
+                                const optPrefix = opt.trim().charAt(0).toUpperCase();
+                                const isCorrectOpt = optPrefix === q.correctAnswer;
+                                optionsHtml += `
+                                    <div class="review-option ${isCorrectOpt ? 'is-correct' : ''}">
+                                        ${opt}
+                                    </div>
+                                `;
+                            });
+                        }
+
+                        // Determine answer ribbon text (handling both multiple choice and Level 8 Q&A style)
+                        let correctDisplay = '';
+                        if (q.correctAnswer && q.correctText) {
+                            correctDisplay = `${q.correctAnswer}. ${q.correctText}`;
+                        } else {
+                            correctDisplay = q.correctText || q.answer || '';
+                        }
+
+                        html += `
+                            <div class="review-q-card">
+                                <div class="review-q-header">【问题 ${index + 1}】</div>
+                                <div class="review-q-text">${q.question}</div>
+                                ${hasOptions ? `<div class="review-options">${optionsHtml}</div>` : ''}
+                                <div class="review-correct-ribbon">
+                                    <span class="ans-label">✓ 正确答案：</span>
+                                    <span class="ans-val">${correctDisplay}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    this.listEl.innerHTML = html;
+                }
+
+                if (this.modalEl) {
+                    this.modalEl.style.display = 'flex';
+                    this.modalEl.offsetHeight; // Force reflow for scale animation
+                    this.modalEl.classList.add('active');
+                }
+            },
+
+            close() {
+                if (this.modalEl) {
+                    this.modalEl.classList.remove('active');
+                    setTimeout(() => {
+                        this.modalEl.style.display = 'none';
+                    }, 250);
+                }
+            }
+        };
+
+        window.QuestionReview = QuestionReview;
 
         // --- 🧭 REUSABLE ADVENTURE RECORD MODULE ---
         const AdventureRecord = {
@@ -1705,7 +2564,7 @@
                 const totalLevels = 9;
                 let completedCount = 0;
                 let earnedStars = 0;
-                const maxStars = totalLevels * 3; // 27 total stars
+                const maxStars = totalLevels * 3;
 
                 let listHtml = '';
 
@@ -1714,7 +2573,6 @@
                     const isCompleted = !!levelData.completed;
                     const isUnlocked = id === 1 || !!levelData.unlocked;
                     
-                    // Stars calculation: default to 3 stars when level completed without explicit stars count
                     let stars = 0;
                     if (isCompleted) {
                         stars = levelData.stars !== undefined ? levelData.stars : 3;
@@ -1730,7 +2588,6 @@
                     }
                     earnedStars += stars;
 
-                    // Render star sequence
                     let starDisplay = '';
                     if (isCompleted || isUnlocked) {
                         for (let s = 1; s <= 3; s++) {
@@ -1744,7 +2601,7 @@
                     const statusText = isCompleted ? '✅ 已完成' : '🔒 未完成';
 
                     listHtml += `
-                        <div class="adventure-card" data-completed="${isCompleted}">
+                        <div class="adventure-card" data-level="${id}" data-completed="${isCompleted}">
                             <div class="adventure-card-info">
                                 <span class="adventure-card-name">LEVEL ${id}</span>
                                 <span class="adventure-card-stars">${starDisplay}</span>
@@ -1757,6 +2614,17 @@
                 }
 
                 this.listEl.innerHTML = listHtml;
+
+                // Bind click event on completed level cards to open Question Review
+                const cards = this.listEl.querySelectorAll('.adventure-card[data-completed="true"]');
+                cards.forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const levelId = card.getAttribute('data-level');
+                        playClickSound();
+                        QuestionReview.open(levelId);
+                    });
+                });
 
                 if (this.overallProgressEl) {
                     this.overallProgressEl.textContent = `${completedCount} / ${totalLevels} Levels`;
@@ -1771,7 +2639,7 @@
                 this.render();
                 if (this.modalEl) {
                     this.modalEl.style.display = 'flex';
-                    this.modalEl.offsetHeight; // Force reflow for scale + fade animation
+                    this.modalEl.offsetHeight;
                     this.modalEl.classList.add('active');
                 }
             },
@@ -1781,12 +2649,11 @@
                     this.modalEl.classList.remove('active');
                     setTimeout(() => {
                         this.modalEl.style.display = 'none';
-                    }, 250); // Matches close animation duration (250ms)
+                    }, 250);
                 }
             }
         };
 
-        // Exposed globally for future extensions
         window.AdventureRecord = AdventureRecord;
 
         // Clean configuration array for independent PNG badges
@@ -1825,30 +2692,28 @@
         const bgMusic = new Audio('bg_music.mp3');
         bgMusic.loop = true;
         bgMusic.preload = 'auto';
-        bgMusic.volume = 0; // Starts at 0 for initial fade-in
+        bgMusic.volume = 0;
 
         const clickSfx = new Audio('click1.mp3');
         clickSfx.preload = 'auto';
-        clickSfx.volume = 0.65; // Balanced volume between 60-70% to pierce over BGM
+        clickSfx.volume = 0.65;
 
-        // Play and restart click sound object cleanly without overlap
         function playClickSound() {
             try {
                 clickSfx.pause();
                 clickSfx.currentTime = 0;
-                clickSfx.play().catch(e => console.warn("SFX play postponed or blocked:", e));
+                clickSfx.play().catch(e => console.warn("SFX play postponed:", e));
             } catch (err) {
                 console.warn("Audio click playback failed:", err);
             }
         }
 
-        // Smooth volume fade-in over duration (volume limits capped at 35%)
         function fadeInBGM(duration = 1000) {
             bgMusic.volume = 0;
             const playPromise = bgMusic.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    const targetVolume = 0.35; // Volume optimized between 30-40%
+                    const targetVolume = 0.35;
                     const startTime = performance.now();
                     function step(now) {
                         const elapsed = now - startTime;
@@ -1866,7 +2731,6 @@
             }
         }
 
-        // Reliable BGM resume function across navigation, focus, and BFCache restores
         let isAutoplayFallbackRegistered = false;
 
         function setupAutoplayFallback() {
@@ -1891,7 +2755,6 @@
         }
 
         function ensureBGMPlaying() {
-            // Do not play before player clicks "进入地图" if Cloud Intro is currently active
             if (shouldShowCloudIntro()) {
                 return;
             }
@@ -1899,7 +2762,7 @@
             const targetVolume = 0.35;
 
             if (!bgMusic.paused && bgMusic.volume > 0) {
-                return; // Already playing properly
+                return;
             }
 
             bgMusic.volume = targetVolume;
@@ -1914,7 +2777,6 @@
             }
         }
 
-        // Smooth volume fade-out over 300-500ms before redirection
         function fadeOutBGM(duration = 400) {
             return new Promise((resolve) => {
                 const startVolume = bgMusic.volume;
@@ -1939,62 +2801,49 @@
         const mapContainer = document.getElementById('mapLayer');
         const mapImage = document.getElementById('mapImage');
 
-        // Independent, decoupled camera target variables
         let targetCameraScale = 1.0;
         let targetCameraX = 0;
         let targetCameraY = 0;
 
-        // Current rendered camera variables
         let currentCameraScale = 1.0;
         let currentCameraX = 0;
         let currentCameraY = 0;
 
-        // Inertia state variables
         let vx = 0;
         let vy = 0;
         let lastPointerX = 0;
         let lastPointerY = 0;
         let lastPointerTime = 0;
 
-        // Pointer tracking lists
         let activePointers = [];
         let isPointerDown = false;
         let startX = 0;
         let startY = 0;
         let startTargetCameraX = 0;
         let startTargetCameraY = 0;
-        let dragExceeded = false; // Evaluated true if pointer movement > 8px
+        let dragExceeded = false;
 
-        // Tap selection targets
         let pressedBadge = null;
         let pressedUIButton = null;
 
-        // Pinch-zoom tracking
         let initialPinchDist = 0;
         let initialPinchScale = 1.0;
         let pinchCenterX = 0;
         let pinchCenterY = 0;
 
-        // Viewport and container dimensions
         let viewW = viewport.clientWidth;
         let viewH = viewport.clientHeight;
         let mapW = 0;
         let mapH = 0;
 
-        // Tracker for primary initialization
         let isInitialLoad = true;
 
-        // Set default camera position
         function setInitialCamera() {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                // Cover mode naturally overflows. Set zoom to 1.25 on load
                 targetCameraScale = 1.25;
-                
                 const scaledH = mapH * targetCameraScale;
                 const limitY = Math.max(0, (scaledH - viewH) / 2);
-                
-                // Position camera proportionally higher so the top layout aligns exactly with viewport top.
                 targetCameraY = limitY;
                 targetCameraX = 0;
             } else {
@@ -2013,18 +2862,16 @@
             clampBounds();
         }
 
-        // Dynamic, proportional aspect ratio resolution
         function updateMapDimensions() {
             viewW = viewport.clientWidth;
             viewH = viewport.clientHeight;
 
-            const mapAspectRatio = 1000 / 1482; // Native aspect ratio of map.png
+            const mapAspectRatio = 1000 / 1482;
             const viewAspectRatio = viewW / viewH;
 
             const isMobile = window.innerWidth <= 768;
 
             if (isMobile) {
-                // Cover Logic: Scale map up to completely fill screen with zero empty borders
                 if (viewAspectRatio > mapAspectRatio) {
                     mapW = viewW;
                     mapH = viewW / mapAspectRatio;
@@ -2033,7 +2880,6 @@
                     mapW = viewH * mapAspectRatio;
                 }
             } else {
-                // Contain Logic: Keep entire map perfectly visible on desktop
                 if (viewAspectRatio > mapAspectRatio) {
                     mapH = viewH;
                     mapW = viewH * mapAspectRatio;
@@ -2053,7 +2899,6 @@
             }
         }
 
-        // Track screen sizing changes safely
         let lastWidth = window.innerWidth;
         let lastHeight = window.innerHeight;
 
@@ -2061,7 +2906,6 @@
             const currentWidth = window.innerWidth;
             const currentHeight = window.innerHeight;
             
-            // Re-render layout only if boundaries shift significantly (avoids address bar jitter)
             if (Math.abs(currentWidth - lastWidth) > 5 || Math.abs(currentHeight - lastHeight) > 15) {
                 lastWidth = currentWidth;
                 lastHeight = currentHeight;
@@ -2071,13 +2915,11 @@
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', () => {
-            setTimeout(updateMapDimensions, 150); // Settle browser UI transition
+            setTimeout(updateMapDimensions, 150);
         });
 
-        // Easing interpolation
         const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
 
-        // Camera bounding clamp algorithm
         function clampBounds() {
             if (mapW === 0 || mapH === 0) return;
 
@@ -2100,7 +2942,6 @@
             }
         }
 
-        // Zoom function
         function zoomToPoint(zoomCenterViewportX, zoomCenterViewportY, newScale) {
             newScale = Math.max(1.0, Math.min(2.0, newScale));
             if (newScale === targetCameraScale) return;
@@ -2127,7 +2968,7 @@
         function openMenuModal() {
             if (menuModal) {
                 menuModal.style.display = 'flex';
-                menuModal.offsetHeight; // Force reflow for smooth animation
+                menuModal.offsetHeight;
                 menuModal.classList.add('active');
             }
         }
@@ -2145,7 +2986,7 @@
             closeMenuModal();
             if (confirmResetModal) {
                 confirmResetModal.style.display = 'flex';
-                confirmResetModal.offsetHeight; // Force reflow
+                confirmResetModal.offsetHeight;
                 confirmResetModal.classList.add('active');
             }
         }
@@ -2183,19 +3024,14 @@
         if (btnConfirmReset) {
             btnConfirmReset.addEventListener('click', () => {
                 playClickSound();
-                
-                // Perform complete reset
                 GameProgression.resetProgression();
                 localStorage.removeItem("introLastPlayedAt");
                 localStorage.removeItem("introPlayed");
                 sessionStorage.removeItem("introPlayed");
-
-                // Clean reload for total fresh-start testing
                 window.location.reload();
             });
         }
 
-        // Backdrop click to close modals
         if (menuModal) {
             menuModal.addEventListener('click', (e) => {
                 if (e.target === menuModal) {
@@ -2216,19 +3052,23 @@
 
         // --- POINTER EVENTS SYSTEM ---
         viewport.addEventListener('pointerdown', (e) => {
-            // Ignore viewport pan when interacting with open modals
             const victoryModal = document.getElementById('victoryModal');
             const adventureModal = document.getElementById('adventureRecordModal');
-            if (menuModal.classList.contains('active') || confirmResetModal.classList.contains('active') || (victoryModal && victoryModal.classList.contains('active')) || (adventureModal && adventureModal.classList.contains('active'))) {
+            const reviewModal = document.getElementById('questionReviewModal');
+
+            if (menuModal.classList.contains('active') || 
+                confirmResetModal.classList.contains('active') || 
+                (victoryModal && victoryModal.classList.contains('active')) || 
+                (adventureModal && adventureModal.classList.contains('active')) ||
+                (reviewModal && reviewModal.classList.contains('active'))) {
                 return;
             }
 
             pressedBadge = e.target.closest('.mission-badge');
             pressedUIButton = e.target.closest('.ui-button');
 
-            // If badge is locked, disable pressing/interaction
             if (pressedBadge && pressedBadge.getAttribute('data-state') === 'locked') {
-                pressedBadge = null; // Ignore interactions on locked state, allowing only map drags
+                pressedBadge = null;
             }
 
             activePointers.push(e);
@@ -2282,7 +3122,6 @@
                     const scaledW = mapW * targetCameraScale;
                     const scaledH = mapH * targetCameraScale;
 
-                    // Allow panning if dimensions exceed current viewport boundary
                     if (scaledW > viewW || scaledH > viewH) {
                         targetCameraX = startTargetCameraX + dx;
                         targetCameraY = startTargetCameraY + dy;
@@ -2334,20 +3173,18 @@
                         const badgeId = pressedBadge.getAttribute('data-level');
                         const state = pressedBadge.getAttribute('data-state');
 
-                        // Double check that node is not locked
                         if (state !== 'locked') {
                             const badgeData = BADGES.find(b => b.id == badgeId);
 
                             if (badgeData && !pressedBadge.classList.contains('clicked')) {
                                 pressedBadge.classList.add('clicked');
                                 
-                                // Trigger the burst animation if it is a completed level
                                 if (state === 'completed') {
                                     pressedBadge.classList.add('burst-active');
                                 }
 
                                 playClickSound();
-                                fadeOutBGM(400); // Dynamic seamless fadeout over 400ms during delayed redirection
+                                fadeOutBGM(400);
 
                                 setTimeout(() => {
                                     window.location.href = badgeData.level;
@@ -2395,7 +3232,6 @@
         viewport.addEventListener('pointerup', handlePointerUp);
         viewport.addEventListener('pointercancel', handlePointerUp);
 
-        // Desktop Mouse Wheel zoom interface
         viewport.addEventListener('wheel', (e) => {
             e.preventDefault();
             const zoomFactor = 0.1;
@@ -2404,10 +3240,14 @@
             zoomToPoint(e.clientX, e.clientY, nextScale);
         }, { passive: false });
 
-        // Mobile/Tablet Double Tap toggle: zoom relative to device profile
         let lastTapTime = 0;
         viewport.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.ui-button') || e.target.closest('.menu-modal-content') || e.target.closest('.victory-banner-container') || e.target.closest('.adventure-modal-content')) return;
+            if (e.target.closest('.ui-button') || 
+                e.target.closest('.menu-modal-content') || 
+                e.target.closest('.victory-banner-container') || 
+                e.target.closest('.adventure-modal-content') ||
+                e.target.closest('.review-modal-content')) return;
+
             const currentTime = new Date().getTime();
             const tapDelay = currentTime - lastTapTime;
             if (tapDelay < 300 && tapDelay > 0) {
@@ -2420,7 +3260,7 @@
         function handleDoubleTap(x, y) {
             const isMobile = window.innerWidth <= 768;
             const baseScale = isMobile ? 1.25 : 1.0;
-            const zoomScale = isMobile ? 1.8 : 1.8;
+            const zoomScale = 1.8;
 
             if (targetCameraScale > baseScale + 0.1) {
                 zoomToPoint(x, y, baseScale);
@@ -2429,7 +3269,6 @@
             }
         }
 
-        // --- ANIMATION INTERPOLATION RENDERING LOOP ---
         function renderLoop() {
             const scaledW = mapW * targetCameraScale;
             const scaledH = mapH * targetCameraScale;
@@ -2456,7 +3295,6 @@
             requestAnimationFrame(renderLoop);
         }
 
-        // Run animation loop
         requestAnimationFrame(renderLoop);
 
         // --- CHAMPION BADGE SPARKLE PARTICLE EMITTER ---
@@ -2471,7 +3309,6 @@
                     return;
                 }
 
-                // Randomly generate 2~4 small golden sparkles
                 const count = Math.floor(Math.random() * 3) + 2; 
                 for (let i = 0; i < count; i++) {
                     setTimeout(() => {
@@ -2479,13 +3316,11 @@
                         const sparkle = document.createElement('div');
                         sparkle.className = 'champion-sparkle';
                         
-                        // Random position around Badge 9 (-15% to 115%)
                         const left = (Math.random() * 130 - 15).toFixed(1) + '%';
                         const top = (Math.random() * 130 - 15).toFixed(1) + '%';
                         sparkle.style.left = left;
                         sparkle.style.top = top;
                         
-                        // Random duration 1.2s - 1.8s
                         const dur = (1.2 + Math.random() * 0.6).toFixed(2) + 's';
                         sparkle.style.animationDuration = dur;
 
@@ -2497,7 +3332,6 @@
                     }, i * 180);
                 }
 
-                // Random interval between 5000ms and 8000ms (5~8 seconds)
                 const nextInterval = Math.floor(Math.random() * 3000) + 5000;
                 championSparkleTimer = setTimeout(emitSparkles, nextInterval);
             }
@@ -2506,8 +3340,6 @@
         }
 
         // --- ARCHITECTURAL BADGE RENDERING SYSTEM ---
-
-        // Maps level ID directly to state string values
         function getBadgeState(levelId) {
             const id = parseInt(levelId);
             
@@ -2520,17 +3352,14 @@
             return 'locked';
         }
 
-        // Reactively adjusts UI alignment of all badge states from localStorage
         function updateBadgeStates() {
             const badges = document.querySelectorAll('.mission-badge');
             badges.forEach(el => {
                 const badgeId = el.getAttribute('data-level');
                 const state = getBadgeState(badgeId);
                 
-                // Update dynamic attribute structure
                 el.setAttribute('data-state', state);
 
-                // Setup lock overlays dynamically to maintain identical DOM size and position
                 let lockOverlay = el.querySelector('.lock-overlay');
                 if (state === 'locked') {
                     if (!lockOverlay) {
@@ -2549,9 +3378,7 @@
                     }
                 }
 
-                // --- PREMIUM ADAPTIVE COMPLETED VISUAL LAYERS ---
                 if (state === 'completed') {
-                    // Generate unique desynchronized animation parameters once on initialization
                     if (!el.style.getPropertyValue('--halo-delay')) {
                         const haloDelay = -(Math.random() * 10).toFixed(2) + 's';
                         const haloSpeed = (8 + Math.random() * 4).toFixed(2) + 's';
@@ -2566,7 +3393,6 @@
                         el.style.setProperty('--glow-speed', glowSpeed);
                     }
 
-                    // Layer 1: Inner Glow Edge
                     let innerGlow = el.querySelector('.inner-glow-layer');
                     if (!innerGlow) {
                         innerGlow = document.createElement('div');
@@ -2574,7 +3400,6 @@
                         el.appendChild(innerGlow);
                     }
 
-                    // Layer 2: Rotating Golden energy Halo
                     let halo = el.querySelector('.rotating-halo-layer');
                     if (!halo) {
                         halo = document.createElement('div');
@@ -2582,13 +3407,11 @@
                         el.appendChild(halo);
                     }
 
-                    // Layer 3: Sparkling organic stars
                     let sparklesContainer = el.querySelector('.sparkles-container');
                     if (!sparklesContainer) {
                         sparklesContainer = document.createElement('div');
                         sparklesContainer.className = 'sparkles-container';
                         
-                        // Populate with 3 independent out-of-phase stars
                         for (let i = 1; i <= 3; i++) {
                             const sparkle = document.createElement('div');
                             sparkle.className = `sparkle sp-${i}`;
@@ -2608,7 +3431,6 @@
                         el.appendChild(sparklesContainer);
                     }
 
-                    // Layer 4: Click radial burst container
                     let clickBurst = el.querySelector('.click-burst-layer');
                     if (!clickBurst) {
                         clickBurst = document.createElement('div');
@@ -2616,11 +3438,9 @@
                         el.appendChild(clickBurst);
                     }
 
-                    // --- BADGE 9 SPECIAL CHAMPION EFFECTS ---
                     if (badgeId === '9') {
                         el.setAttribute('data-champion', 'true');
 
-                        // Champion Layer A: Soft Golden Aura Breathing Glow
                         let champGlow = el.querySelector('.champion-glow-layer');
                         if (!champGlow) {
                             champGlow = document.createElement('div');
@@ -2628,7 +3448,6 @@
                             el.appendChild(champGlow);
                         }
 
-                        // Champion Layer B: Gold Medal Light Sweep / Shimmer Layer
                         let champShimmer = el.querySelector('.champion-shimmer-layer');
                         if (!champShimmer) {
                             champShimmer = document.createElement('div');
@@ -2636,11 +3455,9 @@
                             el.appendChild(champShimmer);
                         }
 
-                        // Start Sparkle particle emitter loop
                         startChampionSparkleEmitter(el);
                     }
                 } else {
-                    // Symmetrical cleanup: avoid memory leaks / leftover styling properties on reset
                     if (badgeId === '9') {
                         el.removeAttribute('data-champion');
                         const champGlow = el.querySelector('.champion-glow-layer');
@@ -2670,12 +3487,10 @@
             });
         }
 
-        // --- BADGE GENERATION PIPELINE ---
         function generateBadges() {
             const overlay = document.getElementById('interactiveOverlay');
-            overlay.innerHTML = ''; // Clear prior generation references
+            overlay.innerHTML = '';
 
-            // Structure menu hotspots
             const btnMenu = document.createElement('div');
             btnMenu.className = 'ui-button';
             btnMenu.id = 'btn-menu';
@@ -2688,7 +3503,6 @@
             btnAch.style.cssText = 'left: 92.7%; top: 4.8%; width: 9%; height: 9%; border-radius: 50%;';
             overlay.appendChild(btnAch);
             
-            // Build permanent badges (always visible, identical sizes and positions)
             BADGES.forEach(badge => {
                 const el = document.createElement('div');
                 el.className = 'mission-badge';
@@ -2710,17 +3524,15 @@
                 overlay.appendChild(el);
             });
 
-            // Run initial alignment loop
             updateBadgeStates();
         }
 
-        // --- FINAL LEVEL CELEBRATION (LEVEL 9 COMPLETION FIREWORKS & BANNER) ---
+        // --- FINAL LEVEL CELEBRATION ---
         function checkAndStartFinalCelebration() {
             const justCompleted = localStorage.getItem('level9JustCompleted') === 'true';
             const isCompleted = GameProgression.isCompleted(9);
             const celebrated = localStorage.getItem('level9Celebrated') === 'true';
 
-            // Immediately consume level9JustCompleted upon detection to prevent repetition
             if (justCompleted) {
                 localStorage.removeItem('level9JustCompleted');
                 localStorage.setItem('level9Celebrated', 'true');
@@ -2737,13 +3549,12 @@
         }
 
         function startFinalCelebration() {
-            // Activate Victory Banner Overlay using victory_banner.png
             const victoryModal = document.getElementById('victoryModal');
             const btnVictoryHome = document.getElementById('btnVictoryHome');
 
             if (victoryModal) {
                 victoryModal.style.display = 'flex';
-                victoryModal.offsetHeight; // Force reflow for smooth animation
+                victoryModal.offsetHeight;
                 victoryModal.classList.add('active');
             }
 
@@ -2759,7 +3570,6 @@
                 };
             }
 
-            // Fireworks Canvas Overlay (z-index 99999, victoryModal sits at z-index 100000)
             const canvas = document.createElement('canvas');
             canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;pointer-events:none;z-index:99999;';
             document.body.appendChild(canvas);
@@ -2774,14 +3584,13 @@
             };
             window.addEventListener('resize', handleResize);
 
-            // Premium AAA Gold & Amber Palette
             const GOLD_PALETTE = [
-                '#ffffff', // Sparkle white core
-                '#fff3a0', // Warm shimmering white
-                '#ffd700', // Metallic Gold
-                '#ffae00', // Deep Gold
-                '#ff8c00', // Amber Orange
-                '#e6a100'  // Dark Warm Gold
+                '#ffffff',
+                '#fff3a0',
+                '#ffd700',
+                '#ffae00',
+                '#ff8c00',
+                '#e6a100'
             ];
 
             let animationFrameId = null;
@@ -2790,7 +3599,6 @@
             let particles = [];
             let sparkles = [];
 
-            // Scheduled launch sequence spanning ~3.2s with grand finale
             const schedule = [
                 { time: 0, pos: 'left' },
                 { time: 100, pos: 'right' },
@@ -2853,7 +3661,6 @@
             function loop(now) {
                 const elapsed = now - startTime;
 
-                // Process scheduled launches
                 while (launchIndex < schedule.length && elapsed >= schedule[launchIndex].time) {
                     launchRocket(schedule[launchIndex].pos);
                     launchIndex++;
@@ -2861,12 +3668,10 @@
 
                 ctx.clearRect(0, 0, width, height);
 
-                // Update & Render Rockets
                 for (let i = rockets.length - 1; i >= 0; i--) {
                     const r = rockets[i];
                     r.y += r.vy;
 
-                    // Rocket trail
                     ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
                     ctx.beginPath();
                     ctx.arc(r.x + (Math.random() - 0.5) * 2, r.y + 6, 2, 0, Math.PI * 2);
@@ -2883,14 +3688,13 @@
                     }
                 }
 
-                // Update & Render Main Explosion Particles
                 for (let i = particles.length - 1; i >= 0; i--) {
                     const p = particles[i];
                     p.x += p.vx;
                     p.y += p.vy;
                     p.vx *= 0.95;
                     p.vy *= 0.95;
-                    p.vy += 0.08; // Gravity
+                    p.vy += 0.08;
                     p.life -= p.decay;
 
                     if (p.life <= 0) {
@@ -2898,7 +3702,6 @@
                         continue;
                     }
 
-                    // Spawn trailing micro sparkles
                     if (Math.random() < 0.25) {
                         sparkles.push({
                             x: p.x + (Math.random() - 0.5) * 4,
@@ -2921,7 +3724,6 @@
                     ctx.restore();
                 }
 
-                // Update & Render Sparkling Particles
                 for (let i = sparkles.length - 1; i >= 0; i--) {
                     const s = sparkles[i];
                     s.x += s.vx;
@@ -2944,10 +3746,9 @@
                     ctx.restore();
                 }
 
-                // Clean termination check
                 if (launchIndex >= schedule.length && rockets.length === 0 && particles.length === 0 && sparkles.length === 0) {
                     cleanup();
-                } else if (elapsed > 6000) { // Safety cutoff
+                } else if (elapsed > 6000) {
                     cleanup();
                 } else {
                     animationFrameId = requestAnimationFrame(loop);
@@ -2988,7 +3789,6 @@
                         resolve();
                     };
                     img.onerror = () => {
-                        // Resilient asset error recovery prevents layout blocks
                         loadedCount++;
                         onProgress(loadedCount, total);
                         resolve();
@@ -2997,43 +3797,28 @@
             }));
         }
 
-        // Handle completed assets state cleanly
         function onLoadingFinished() {
             const loadingScreen = document.getElementById('loadingScreen');
             const gameViewport = document.getElementById('gameViewport');
 
-            // Generate map nodes on cached assets
             generateBadges();
-
-            // Set cached map layout artwork
             mapImage.src = 'map.png';
-
-            // Stabilize initial container dimensions
             updateMapDimensions();
 
-            // Evaluate 1-hour Cloud Intro Cooldown condition
             const showIntro = shouldShowCloudIntro();
 
             if (!showIntro) {
-                // Within 1-hour cooldown: Instantly remove cloud intro screen
                 const cloudIntroScreen = document.getElementById('cloudIntroScreen');
                 if (cloudIntroScreen) cloudIntroScreen.remove();
 
-                // Reveal normal map immediately
                 gameViewport.classList.add('interactive');
                 loadingScreen.classList.add('fade-out');
 
-                // Ensure BGM plays reliably for returning sessions
                 ensureBGMPlaying();
-
-                // Trigger celebration check once map is visible
                 checkAndStartFinalCelebration();
             } else {
-                // Cooldown expired or first-time visit:
-                // Clean up legacy boolean key if present
                 localStorage.removeItem("introPlayed");
 
-                // Randomize start positions of cloud layers on load
                 const layers = document.querySelectorAll('.cloud-layer');
                 layers.forEach(layer => {
                     const rx = Math.floor(Math.random() * 1200);
@@ -3041,41 +3826,29 @@
                     layer.style.backgroundPosition = `${rx}px ${ry}px`;
                 });
 
-                // Fade out loading screen to reveal Cloud overlay underneath
                 loadingScreen.classList.add('fade-out');
 
-                // Bind Cinematic Cloud "进入地图" Button Interaction
                 const btnEnterMap = document.getElementById('btnEnterMap');
                 const cloudIntroScreen = document.getElementById('cloudIntroScreen');
 
                 btnEnterMap.addEventListener('click', () => {
-                    // Save timestamp when player actually completes/enters through Cloud Intro
                     localStorage.setItem("introLastPlayedAt", Date.now().toString());
-
-                    // Play soft magical transition sound immediately
                     playClickSound();
-
-                    // Start loop background music playback and 1s fade-in smoothly
                     fadeInBGM();
 
-                    // Trigger cloud partition separation and parallel map scaling reveal
                     cloudIntroScreen.classList.add('separating');
 
-                    // Cleanly remove overlay from DOM and grant interactive map control after animation finishes
                     setTimeout(() => {
                         cloudIntroScreen.remove();
-                        gameViewport.classList.add('interactive'); // Grants pointer zoom/drag interaction
+                        gameViewport.classList.add('interactive');
                         checkAndStartFinalCelebration();
                     }, 1800);
                 });
             }
 
             console.log("GameProgression Engine loaded.");
-            console.log("To complete current levels and test progressions, run: GameProgression.completeLevel(1)");
-            console.log("To reset the game completely, run: GameProgression.resetProgression()");
         }
 
-        // Dynamic State & Audio Refresher on history page navigation / BF-Cache focus events
         window.addEventListener('pageshow', (e) => {
             updateBadgeStates();
             if (!shouldShowCloudIntro()) {
@@ -3094,26 +3867,23 @@
             }
         });
 
-        // Initialize Loading pipeline
         window.addEventListener('DOMContentLoaded', () => {
             const progressBarFill = document.getElementById('progressBarFill');
             const loadingPercentage = document.getElementById('loadingPercentage');
 
-            // Low-latency concurrent HTML5 audio preloading
             const audioPreloadPromises = [
                 new Promise(res => {
                     bgMusic.addEventListener('canplaythrough', res, { once: true });
                     bgMusic.addEventListener('error', res, { once: true });
-                    setTimeout(res, 2000); // 2s maximum cutoff safety timeout
+                    setTimeout(res, 2000);
                 }),
                 new Promise(res => {
                     clickSfx.addEventListener('canplaythrough', res, { once: true });
                     clickSfx.addEventListener('error', res, { once: true });
-                    setTimeout(res, 2000); // 2s maximum cutoff safety timeout
+                    setTimeout(res, 2000);
                 })
             ];
 
-            // Core preloading engine combining images and audio
             Promise.all([
                 preloadAssets(ASSETS, (loaded, total) => {
                     const percent = Math.round((loaded / total) * 100);
@@ -3122,16 +3892,14 @@
                 }),
                 ...audioPreloadPromises
             ]).then(() => {
-                // Symmetrical fadeout delay
                 setTimeout(onLoadingFinished, 500);
             });
         });
 
-        // --- PWA SERVICE WORKER REGISTRATION ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker registered inside game scope:', reg.scope))
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
                     .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
